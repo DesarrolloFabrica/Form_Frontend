@@ -1,4 +1,5 @@
 import { cn } from '@/lib/utils';
+import { CalendarDays, Clock } from 'lucide-react';
 import {
   forwardRef,
   type ButtonHTMLAttributes,
@@ -13,7 +14,7 @@ const buttonVariants = {
   primary:
     'bg-accent text-white shadow-sm hover:bg-accent-hover focus-visible:ring-2 focus-visible:ring-accent/40',
   secondary:
-    'bg-surface-elevated text-foreground border border-border hover:bg-surface focus-visible:ring-2 focus-visible:ring-accent/30',
+    'border border-border/90 bg-surface-elevated text-foreground shadow-sm shadow-slate-900/4 hover:bg-surface focus-visible:ring-2 focus-visible:ring-accent/30 dark:shadow-black/20',
   ghost: 'text-muted hover:text-foreground hover:bg-surface-elevated/80',
   danger: 'bg-red-600/90 text-white hover:bg-red-600 focus-visible:ring-2 focus-visible:ring-red-400/40',
 } as const;
@@ -76,8 +77,36 @@ export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
 }
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(
-  ({ className, label, hint, error, id, ...props }, ref) => {
+  ({ className, label, hint, error, id, type, ...props }, ref) => {
     const inputId = id ?? props.name;
+
+    const isTime = type === 'time';
+    const isDateLike =
+      type === 'date' ||
+      type === 'datetime-local' ||
+      type === 'month' ||
+      type === 'week';
+    const useNativePickerShell = isDateLike || isTime;
+    const PickerIcon = isTime ? Clock : CalendarDays;
+
+    const inputClassName = cn(
+      'h-11 w-full rounded-lg border bg-surface px-3 text-sm text-foreground transition-colors placeholder:text-muted',
+      'shadow-[0_1px_2px_rgb(15_23_42/0.05),inset_0_1px_0_0_rgb(255_255_255/0.85)] dark:shadow-[inset_0_2px_4px_rgb(0_0_0/0.25)]',
+      'border-border/90 focus-visible:border-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/25',
+      error && 'border-danger focus-visible:border-danger focus-visible:ring-danger/25',
+      useNativePickerShell && 'date-input-shell dark:pr-10',
+      className,
+    );
+
+    const control = (
+      <input
+        ref={ref}
+        id={inputId}
+        type={type}
+        className={inputClassName}
+        {...props}
+      />
+    );
 
     return (
       <div className="flex w-full flex-col gap-1.5">
@@ -86,17 +115,18 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             {label}
           </label>
         ) : null}
-        <input
-          ref={ref}
-          id={inputId}
-          className={cn(
-            'h-11 w-full rounded-lg border bg-surface px-3 text-sm text-foreground shadow-inner transition-colors placeholder:text-muted',
-            'border-border focus-visible:border-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/25',
-            error && 'border-danger focus-visible:border-danger focus-visible:ring-danger/25',
-            className,
-          )}
-          {...props}
-        />
+        {useNativePickerShell ? (
+          <div className="relative w-full">
+            {control}
+            <PickerIcon
+              className="pointer-events-none absolute right-3 top-1/2 hidden size-4.5 -translate-y-1/2 text-muted dark:block"
+              aria-hidden
+              strokeWidth={1.75}
+            />
+          </div>
+        ) : (
+          control
+        )}
         {error ? <p className="text-xs text-danger">{error}</p> : null}
         {!error && hint ? <p className="text-xs text-muted">{hint}</p> : null}
       </div>
@@ -128,8 +158,9 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
           ref={ref}
           id={inputId}
           className={cn(
-            'min-h-[120px] w-full resize-y rounded-lg border bg-surface px-3 py-2.5 text-sm text-foreground shadow-inner transition-colors placeholder:text-muted',
-            'border-border focus-visible:border-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/25',
+            'min-h-[120px] w-full resize-y rounded-lg border bg-surface px-3 py-2.5 text-sm text-foreground transition-colors placeholder:text-muted',
+            'shadow-[0_1px_2px_rgb(15_23_42/0.05),inset_0_1px_0_0_rgb(255_255_255/0.85)] dark:shadow-[inset_0_2px_4px_rgb(0_0_0/0.25)]',
+            'border-border/90 focus-visible:border-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/25',
             error && 'border-danger focus-visible:border-danger focus-visible:ring-danger/25',
             className,
           )}
@@ -174,8 +205,9 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
             ref={ref}
             id={inputId}
             className={cn(
-              'h-11 w-full appearance-none rounded-lg border bg-surface px-3 pr-10 text-sm text-foreground shadow-inner transition-colors',
-              'border-border focus-visible:border-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/25',
+              'h-11 w-full appearance-none rounded-lg border bg-surface px-3 pr-10 text-sm text-foreground transition-colors',
+              'shadow-[0_1px_2px_rgb(15_23_42/0.05),inset_0_1px_0_0_rgb(255_255_255/0.85)] dark:shadow-[inset_0_2px_4px_rgb(0_0_0/0.25)]',
+              'border-border/90 focus-visible:border-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/25',
               error && 'border-danger focus-visible:border-danger focus-visible:ring-danger/25',
               className,
             )}
@@ -206,9 +238,12 @@ Select.displayName = 'Select';
 /* —— Badge —— */
 const badgeVariants = {
   default: 'bg-surface-elevated text-foreground border border-border',
-  accent: 'bg-accent/15 text-blue-200 border border-accent/30',
-  success: 'bg-emerald-500/15 text-emerald-200 border border-emerald-500/30',
-  warning: 'bg-amber-500/15 text-amber-100 border border-amber-500/30',
+  accent:
+    'border border-blue-200 bg-blue-100 text-blue-950 dark:border-accent/30 dark:bg-accent/15 dark:text-blue-200',
+  success:
+    'border border-emerald-200 bg-emerald-100 text-emerald-950 dark:border-emerald-500/30 dark:bg-emerald-500/15 dark:text-emerald-200',
+  warning:
+    'border border-amber-200 bg-amber-100 text-amber-950 dark:border-amber-500/30 dark:bg-amber-500/15 dark:text-amber-100',
 } as const;
 
 export interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {

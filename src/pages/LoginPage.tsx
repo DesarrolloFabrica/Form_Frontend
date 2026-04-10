@@ -1,12 +1,10 @@
 import { LoginForm } from '@/components/LoginForm';
 import { appConfig } from '@/config/app.config';
 import { useAuth } from '@/hooks/useAuth';
-import { usePageTitle } from '@/hooks/usePageTitle';
 import { ROUTES } from '@/utils/routeHelpers';
 import { Navigate } from 'react-router-dom';
 
 export function LoginPage() {
-  usePageTitle('Ingreso');
   const { isAuthenticated, hasHydrated } = useAuth();
 
   if (hasHydrated && isAuthenticated) {

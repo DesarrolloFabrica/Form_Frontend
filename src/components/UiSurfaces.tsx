@@ -6,7 +6,10 @@ export function Card({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
   return (
     <div
       className={cn(
-        'rounded-xl border border-border/80 bg-surface-elevated/90 shadow-[0_8px_30px_rgba(0,0,0,0.35)] backdrop-blur-sm',
+        'rounded-xl border border-border/80 bg-surface/95 ring-1 ring-slate-900/4 backdrop-blur-md',
+        'shadow-[0_4px_6px_-1px_rgb(15_23_42/0.06),0_12px_32px_-8px_rgb(15_23_42/0.1)]',
+        'dark:bg-surface-elevated/90 dark:ring-white/6',
+        'dark:shadow-[0_8px_16px_-4px_rgb(0_0_0/0.45),0_24px_48px_-12px_rgb(0_0_0/0.55),inset_0_1px_0_0_rgb(255_255_255/0.04)]',
         className,
       )}
       {...props}

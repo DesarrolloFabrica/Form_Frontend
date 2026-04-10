@@ -1,9 +1,8 @@
-import { createDesarrollo, listDesarrollo } from '@/api/desarrollo';
-import type { DesarrolloPayload, DesarrolloRecord } from '@/api/types';
+import { createDesarrollo } from '@/api/desarrollo';
+import type { DesarrolloPayload } from '@/api/types';
 import { FormActionBar, FormFieldGrid, FormSection } from '@/components/FormLayout';
 import { Button, Input, type SelectOption, Select, Textarea } from '@/components/UiPrimitives';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useCallback, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
@@ -37,27 +36,6 @@ const defaultValues: DesarrolloFormInput = {
 };
 
 export function InventoryDesarrollo() {
-  const [rows, setRows] = useState<DesarrolloRecord[]>([]);
-  const [listLoading, setListLoading] = useState(true);
-  const [listError, setListError] = useState<string | null>(null);
-
-  const loadList = useCallback(async () => {
-    setListError(null);
-    setListLoading(true);
-    try {
-      setRows(await listDesarrollo());
-    } catch {
-      setListError('No se pudo cargar el listado.');
-      setRows([]);
-    } finally {
-      setListLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    void loadList();
-  }, [loadList]);
-
   const {
     register,
     handleSubmit,
@@ -83,7 +61,6 @@ export function InventoryDesarrollo() {
       await createDesarrollo(body);
       toast.success('Registro creado correctamente.');
       reset(defaultValues);
-      await loadList();
     } catch {
       /* toasts / errores vía interceptor o vacío */
     }
@@ -144,46 +121,6 @@ export function InventoryDesarrollo() {
           </Button>
         </FormActionBar>
       </form>
-
-      <div className="space-y-3">
-        <h3 className="text-base font-semibold text-foreground">Registros</h3>
-        {listLoading ? (
-          <p className="text-sm text-muted">Cargando…</p>
-        ) : listError ? (
-          <p className="text-sm text-danger">{listError}</p>
-        ) : rows.length === 0 ? (
-          <p className="text-sm text-muted">No hay registros aún.</p>
-        ) : (
-          <div className="overflow-x-auto rounded-xl border border-border/80">
-            <table className="w-full min-w-[640px] text-left text-sm">
-              <thead className="border-b border-border/80 bg-surface-elevated/80 text-xs uppercase text-muted">
-                <tr>
-                  <th className="px-3 py-2 font-medium">Proyecto</th>
-                  <th className="px-3 py-2 font-medium">Solicitud</th>
-                  <th className="px-3 py-2 font-medium">Entrega</th>
-                  <th className="px-3 py-2 font-medium">Solicitante</th>
-                  <th className="px-3 py-2 font-medium">Estado</th>
-                  <th className="px-3 py-2 font-medium">Observaciones</th>
-                </tr>
-              </thead>
-              <tbody>
-                {rows.map((r) => (
-                  <tr key={r.id ?? `${r.nombreProyecto}-${r.fechaSolicitud}`} className="border-b border-border/60 last:border-0">
-                    <td className="px-3 py-2 text-foreground">{r.nombreProyecto ?? '—'}</td>
-                    <td className="px-3 py-2 text-muted">{r.fechaSolicitud ?? '—'}</td>
-                    <td className="px-3 py-2 text-muted">{r.fechaEntrega ?? '—'}</td>
-                    <td className="px-3 py-2 text-muted">{r.solicitante ?? '—'}</td>
-                    <td className="px-3 py-2 text-muted">{r.estado ?? '—'}</td>
-                    <td className="max-w-[200px] truncate px-3 py-2 text-muted" title={r.observaciones ?? ''}>
-                      {r.observaciones ?? '—'}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
     </div>
   );
 }

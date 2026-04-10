@@ -65,7 +65,7 @@ export function LoginForm() {
   });
 
   return (
-    <Card className="border-border/80 shadow-2xl shadow-black/40">
+    <Card className="border-border/80 shadow-xl shadow-slate-900/12 dark:shadow-2xl dark:shadow-black/40">
       <CardHeader>
         <CardTitle>Iniciar sesión</CardTitle>
         <CardDescription>Ingresa el correo y la contraseña registrados en el sistema.</CardDescription>

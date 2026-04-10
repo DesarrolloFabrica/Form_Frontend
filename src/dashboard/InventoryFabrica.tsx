@@ -1,9 +1,8 @@
-import { createFabrica, listFabrica } from '@/api/fabrica';
-import type { FabricaPayload, FabricaRecord } from '@/api/types';
+import { createFabrica } from '@/api/fabrica';
+import type { FabricaPayload } from '@/api/types';
 import { FormActionBar, FormFieldGrid, FormSection, FormSectionTitle } from '@/components/FormLayout';
 import { Button, Input, type SelectOption, Select, Textarea } from '@/components/UiPrimitives';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useCallback, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
@@ -103,27 +102,6 @@ const defaultValues: FabricaFormInput = {
 };
 
 export function InventoryFabrica() {
-  const [rows, setRows] = useState<FabricaRecord[]>([]);
-  const [listLoading, setListLoading] = useState(true);
-  const [listError, setListError] = useState<string | null>(null);
-
-  const loadList = useCallback(async () => {
-    setListError(null);
-    setListLoading(true);
-    try {
-      setRows(await listFabrica());
-    } catch {
-      setListError('No se pudo cargar el listado.');
-      setRows([]);
-    } finally {
-      setListLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    void loadList();
-  }, [loadList]);
-
   const {
     register,
     handleSubmit,
@@ -163,7 +141,6 @@ export function InventoryFabrica() {
       await createFabrica(body);
       toast.success('Registro creado correctamente.');
       reset(defaultValues);
-      await loadList();
     } catch {
       /* interceptor */
     }
@@ -307,48 +284,6 @@ export function InventoryFabrica() {
           </Button>
         </FormActionBar>
       </form>
-
-      <div className="space-y-3">
-        <h3 className="text-base font-semibold text-foreground">Registros</h3>
-        {listLoading ? (
-          <p className="text-sm text-muted">Cargando…</p>
-        ) : listError ? (
-          <p className="text-sm text-danger">{listError}</p>
-        ) : rows.length === 0 ? (
-          <p className="text-sm text-muted">No hay registros aún.</p>
-        ) : (
-          <div className="overflow-x-auto rounded-xl border border-border/80">
-            <table className="w-full min-w-[720px] text-left text-sm">
-              <thead className="border-b border-border/80 bg-surface-elevated/80 text-xs uppercase text-muted">
-                <tr>
-                  <th className="px-3 py-2 font-medium">Tipo req.</th>
-                  <th className="px-3 py-2 font-medium">Solicitante</th>
-                  <th className="px-3 py-2 font-medium">F. solicitud OT</th>
-                  <th className="px-3 py-2 font-medium">F. entrega</th>
-                  <th className="px-3 py-2 font-medium">Estado</th>
-                  <th className="px-3 py-2 font-medium">Escuela</th>
-                  <th className="px-3 py-2 font-medium">Programa</th>
-                  <th className="px-3 py-2 font-medium">Modalidad</th>
-                </tr>
-              </thead>
-              <tbody>
-                {rows.map((r) => (
-                  <tr key={r.id ?? `${r.tipoRequisicion}-${r.fechaSolicitudOt}`} className="border-b border-border/60 last:border-0">
-                    <td className="px-3 py-2 text-foreground">{r.tipoRequisicion ?? '—'}</td>
-                    <td className="px-3 py-2 text-muted">{r.solicitante ?? '—'}</td>
-                    <td className="px-3 py-2 text-muted">{r.fechaSolicitudOt ?? '—'}</td>
-                    <td className="px-3 py-2 text-muted">{r.fechaEntrega ?? '—'}</td>
-                    <td className="px-3 py-2 text-muted">{r.estado ?? '—'}</td>
-                    <td className="px-3 py-2 text-muted">{r.escuela ?? '—'}</td>
-                    <td className="px-3 py-2 text-muted">{r.programa ?? '—'}</td>
-                    <td className="px-3 py-2 text-muted">{r.modalidad ?? '—'}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
     </div>
   );
 }

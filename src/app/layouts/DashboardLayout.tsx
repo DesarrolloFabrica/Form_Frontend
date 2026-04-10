@@ -3,7 +3,7 @@ import { Outlet } from 'react-router-dom';
 
 export function DashboardLayout() {
   return (
-    <div className="flex min-h-screen bg-background">
+    <div className="flex min-h-screen">
       <AppSidebar />
       <div className="flex min-h-screen flex-1 flex-col">
         <AppTopbar />

@@ -1,12 +1,9 @@
 import { BackButton, PageHeader, SectionWrapper } from '@/components/AppShell';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/UiSurfaces';
 import { InventoryFabrica } from '@/dashboard/InventoryFabrica';
-import { usePageTitle } from '@/hooks/usePageTitle';
 import { ROUTES } from '@/utils/routeHelpers';
 
 export function InventoryFabricaPage() {
-  usePageTitle('Inventario Fábrica');
-
   return (
     <SectionWrapper>
       <BackButton to={ROUTES.DASHBOARD} />

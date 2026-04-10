@@ -1,9 +1,8 @@
-import { createLicencias, listLicencias } from '@/api/licencias';
-import type { LicenciasPayload, LicenciasRecord } from '@/api/types';
+import { createLicencias } from '@/api/licencias';
+import type { LicenciasPayload } from '@/api/types';
 import { FormActionBar, FormFieldGrid, FormSection } from '@/components/FormLayout';
 import { Button, Input, type SelectOption, Select } from '@/components/UiPrimitives';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useCallback, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
@@ -57,27 +56,6 @@ function formatCostoString(n: number): string {
 }
 
 export function InventoryLicencias() {
-  const [rows, setRows] = useState<LicenciasRecord[]>([]);
-  const [listLoading, setListLoading] = useState(true);
-  const [listError, setListError] = useState<string | null>(null);
-
-  const loadList = useCallback(async () => {
-    setListError(null);
-    setListLoading(true);
-    try {
-      setRows(await listLicencias());
-    } catch {
-      setListError('No se pudo cargar el listado.');
-      setRows([]);
-    } finally {
-      setListLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    void loadList();
-  }, [loadList]);
-
   const {
     register,
     handleSubmit,
@@ -104,7 +82,6 @@ export function InventoryLicencias() {
       await createLicencias(body);
       toast.success('Registro creado correctamente.');
       reset(defaultValues);
-      await loadList();
     } catch {
       /* interceptor */
     }
@@ -182,48 +159,6 @@ export function InventoryLicencias() {
           </Button>
         </FormActionBar>
       </form>
-
-      <div className="space-y-3">
-        <h3 className="text-base font-semibold text-foreground">Registros</h3>
-        {listLoading ? (
-          <p className="text-sm text-muted">Cargando…</p>
-        ) : listError ? (
-          <p className="text-sm text-danger">{listError}</p>
-        ) : rows.length === 0 ? (
-          <p className="text-sm text-muted">No hay registros aún.</p>
-        ) : (
-          <div className="overflow-x-auto rounded-xl border border-border/80">
-            <table className="w-full min-w-[800px] text-left text-sm">
-              <thead className="border-b border-border/80 bg-surface-elevated/80 text-xs uppercase text-muted">
-                <tr>
-                  <th className="px-3 py-2 font-medium">Nombre</th>
-                  <th className="px-3 py-2 font-medium">Correo</th>
-                  <th className="px-3 py-2 font-medium">Compra</th>
-                  <th className="px-3 py-2 font-medium">Finalización</th>
-                  <th className="px-3 py-2 font-medium">Tipo</th>
-                  <th className="px-3 py-2 font-medium">Coordinación</th>
-                  <th className="px-3 py-2 font-medium">Costo</th>
-                  <th className="px-3 py-2 font-medium">Moneda</th>
-                </tr>
-              </thead>
-              <tbody>
-                {rows.map((r) => (
-                  <tr key={r.id ?? `${r.nombreLicencias}-${r.correoVinculado}`} className="border-b border-border/60 last:border-0">
-                    <td className="px-3 py-2 text-foreground">{r.nombreLicencias ?? '—'}</td>
-                    <td className="px-3 py-2 text-muted">{r.correoVinculado ?? '—'}</td>
-                    <td className="px-3 py-2 text-muted">{r.fechaCompra ?? '—'}</td>
-                    <td className="px-3 py-2 text-muted">{r.fechaFinalizacion ?? '—'}</td>
-                    <td className="px-3 py-2 text-muted">{r.tipoLicencia ?? '—'}</td>
-                    <td className="px-3 py-2 text-muted">{r.coordinacion ?? '—'}</td>
-                    <td className="px-3 py-2 text-muted">{r.costo ?? '—'}</td>
-                    <td className="px-3 py-2 text-muted">{r.moneda ?? '—'}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
     </div>
   );
 }

@@ -1,22 +1,50 @@
 @import 'tailwindcss';
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
   --font-sans: 'DM Sans', ui-sans-serif, system-ui, sans-serif;
-  --color-background: #0b0f14;
-  --color-surface: #121922;
-  --color-surface-elevated: #1a2330;
-  --color-border: #2a3544;
-  --color-muted: #8b9aad;
-  --color-foreground: #e8eef6;
-  --color-accent: #3b82f6;
-  --color-accent-hover: #2563eb;
-  --color-danger: #f87171;
-  --color-success: #34d399;
+  --color-background: var(--theme-background);
+  --color-surface: var(--theme-surface);
+  --color-surface-elevated: var(--theme-surface-elevated);
+  --color-border: var(--theme-border);
+  --color-muted: var(--theme-muted);
+  --color-foreground: var(--theme-foreground);
+  --color-accent: var(--theme-accent);
+  --color-accent-hover: var(--theme-accent-hover);
+  --color-danger: var(--theme-danger);
+  --color-success: var(--theme-success);
   --radius-lg: 0.75rem;
   --radius-xl: 1rem;
 }
 
 @layer base {
+  :root {
+    --theme-background: #f4f6fb;
+    --theme-surface: #ffffff;
+    --theme-surface-elevated: #eef2f7;
+    --theme-border: #d8dee8;
+    --theme-muted: #64748b;
+    --theme-foreground: #0f172a;
+    --theme-accent: #3b82f6;
+    --theme-accent-hover: #2563eb;
+    --theme-danger: #dc2626;
+    --theme-success: #059669;
+  }
+
+  html.dark {
+    --theme-background: #0b0f14;
+    --theme-surface: #121922;
+    --theme-surface-elevated: #1a2330;
+    --theme-border: #2a3544;
+    --theme-muted: #8b9aad;
+    --theme-foreground: #e8eef6;
+    --theme-accent: #3b82f6;
+    --theme-accent-hover: #2563eb;
+    --theme-danger: #f87171;
+    --theme-success: #34d399;
+  }
+
   *,
   *::before,
   *::after {
@@ -29,13 +57,94 @@
 
   body {
     @apply min-h-screen font-sans text-foreground;
-    background: radial-gradient(1200px 600px at 10% -10%, #132038 0%, transparent 55%),
-      radial-gradient(900px 500px at 100% 0%, #1a2540 0%, transparent 50%),
-      var(--color-background);
     color: var(--color-foreground);
   }
 
-  #root {
-    @apply min-h-screen;
+  /* Fondo en capas: profundidad sin recargar (light) */
+  html:not(.dark) body {
+    background-color: #eef2f7;
+    background-image:
+      radial-gradient(ellipse 100% 65% at 50% -18%, rgb(59 130 246 / 0.16), transparent 58%),
+      radial-gradient(ellipse 75% 55% at 100% 0%, rgb(139 92 246 / 0.1), transparent 52%),
+      radial-gradient(ellipse 60% 50% at 0% 100%, rgb(59 130 246 / 0.08), transparent 55%),
+      linear-gradient(168deg, #fafcfe 0%, #f4f6fb 42%, #eef2f7 100%);
   }
+
+  html.dark body {
+    background-color: #070a0e;
+    background-image:
+      radial-gradient(ellipse 115% 75% at 50% -28%, rgb(59 130 246 / 0.24), transparent 58%),
+      radial-gradient(ellipse 85% 60% at 100% 8%, rgb(99 102 241 / 0.16), transparent 52%),
+      radial-gradient(ellipse 70% 55% at -8% 88%, rgb(30 64 175 / 0.2), transparent 58%),
+      linear-gradient(168deg, #0e141c 0%, #0b0f14 48%, #070a0e 100%);
+  }
+
+  /* Rejilla muy suave, atenuada hacia los bordes (detalle “premium”) */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background-size: 52px 52px;
+    background-image:
+      linear-gradient(to right, rgb(148 163 184 / 0.07) 1px, transparent 1px),
+      linear-gradient(to bottom, rgb(148 163 184 / 0.07) 1px, transparent 1px);
+    mask-image: radial-gradient(ellipse 82% 72% at 50% 48%, #000 18%, transparent 72%);
+    -webkit-mask-image: radial-gradient(ellipse 82% 72% at 50% 48%, #000 18%, transparent 72%);
+  }
+
+  html.dark body::before {
+    background-image:
+      linear-gradient(to right, rgb(148 163 184 / 0.035) 1px, transparent 1px),
+      linear-gradient(to bottom, rgb(148 163 184 / 0.035) 1px, transparent 1px);
+    mask-image: radial-gradient(ellipse 80% 70% at 50% 45%, #000 22%, transparent 78%);
+    -webkit-mask-image: radial-gradient(ellipse 80% 70% at 50% 45%, #000 22%, transparent 78%);
+  }
+
+  #root {
+    @apply relative z-1 min-h-screen;
+  }
+}
+
+/*
+ * Modo oscuro: en Chromium/Edge el filter sobre el indicador nativo a menudo no aplica.
+ * Ocultamos el glifo nativo (sigue siendo clicable) y mostramos icono Lucide en UiPrimitives Input.
+ */
+html.dark {
+  color-scheme: dark;
+}
+
+html.dark input[type='date'].date-input-shell,
+html.dark input[type='datetime-local'].date-input-shell,
+html.dark input[type='month'].date-input-shell,
+html.dark input[type='week'].date-input-shell,
+html.dark input[type='time'].date-input-shell {
+  position: relative;
+}
+
+html.dark input[type='date'].date-input-shell::-webkit-calendar-picker-indicator,
+html.dark input[type='datetime-local'].date-input-shell::-webkit-calendar-picker-indicator,
+html.dark input[type='month'].date-input-shell::-webkit-calendar-picker-indicator,
+html.dark input[type='week'].date-input-shell::-webkit-calendar-picker-indicator,
+html.dark input[type='time'].date-input-shell::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 2.75rem;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  opacity: 0;
+}
+
+html.dark input[type='date'].date-input-shell::-moz-calendar-picker-indicator,
+html.dark input[type='datetime-local'].date-input-shell::-moz-calendar-picker-indicator,
+html.dark input[type='month'].date-input-shell::-moz-calendar-picker-indicator,
+html.dark input[type='week'].date-input-shell::-moz-calendar-picker-indicator,
+html.dark input[type='time'].date-input-shell::-moz-calendar-picker-indicator {
+  cursor: pointer;
+  opacity: 0;
+  width: 2.75rem;
 }

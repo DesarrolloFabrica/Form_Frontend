@@ -16,7 +16,13 @@ export function FormSection({ className, ...props }: HTMLAttributes<HTMLDivEleme
 
 export function FormSectionTitle({ className, ...props }: HTMLAttributes<HTMLHeadingElement>) {
   return (
-    <h3 className={cn('text-sm font-semibold uppercase tracking-wide text-muted', className)} {...props} />
+    <h3
+      className={cn(
+        'border-b border-border/50 pb-2 text-xs font-semibold uppercase tracking-[0.12em] text-muted',
+        className,
+      )}
+      {...props}
+    />
   );
 }
 
