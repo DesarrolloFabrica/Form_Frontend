@@ -18,16 +18,20 @@ export interface LogoProps {
 export function Logo({ className, size = 'md' }: LogoProps) {
   return (
     <div className={cn('flex items-center gap-2', className)}>
-      <img
-        src="/Logosinfondo.png"
-        alt=""
-        width={size === 'sm' ? 32 : 40}
-        height={size === 'sm' ? 32 : 40}
+      <div
         className={cn(
-          'shrink-0 object-contain',
-          size === 'sm' ? 'size-8' : 'size-10',
+          'flex shrink-0 items-center justify-center rounded-xl bg-[#071a2e] px-2 py-1.5 ring-1 ring-sky-950/50',
+          size === 'sm' ? 'h-8' : 'h-11',
         )}
-      />
+      >
+        <img
+          src="/Logosinfondo.png"
+          alt={`${appConfig.shortName} logo`}
+          width={size === 'sm' ? 32 : 40}
+          height={size === 'sm' ? 32 : 40}
+          className={cn('w-auto object-contain', size === 'sm' ? 'max-h-5' : 'max-h-7')}
+        />
+      </div>
       <div className="leading-tight">
         <p className={cn('font-semibold text-foreground', size === 'sm' ? 'text-sm' : 'text-base')}>
           {appConfig.shortName}
