@@ -142,7 +142,7 @@ function SidebarNavigation({
             formularioOpen && 'text-foreground',
           )}
         >
-          Formulario
+          Formularios
           <ChevronDown
             className={cn('size-4 shrink-0 opacity-70 transition-transform', formularioOpen && 'rotate-180')}
             aria-hidden

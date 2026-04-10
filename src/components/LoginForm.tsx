@@ -9,7 +9,6 @@ import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { z } from 'zod';
-// Sugerencia: Importa iconos para darle un toque más profesional
 import { LockKeyhole, Mail, AlertCircle } from 'lucide-react';
 
 const loginSchema = z.object({
@@ -62,76 +61,73 @@ export function LoginForm() {
   });
 
   return (
-    <Card className="w-full max-w-md border-none bg-white/80 backdrop-blur-xl shadow-[0_20px_50px_rgba(0,0,0,0.1)] dark:bg-slate-950/80 dark:shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
-      <CardHeader className="space-y-3 pb-8 text-center">
-        <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
-          <LockKeyhole size={28} strokeWidth={2.5} />
+    <Card className="w-full max-w-md rounded-2xl border border-slate-200/90 bg-white/90 shadow-[0_4px_24px_-4px_rgb(15_23_42/0.08),0_24px_48px_-12px_rgb(15_23_42/0.12)] backdrop-blur-xl dark:border-white/10 dark:bg-[#141b27]/97 dark:shadow-[0_0_0_1px_rgb(255_255_255/0.04)_inset,0_24px_56px_-12px_rgb(0_0_0/0.55),0_12px_24px_-8px_rgb(0_0_0/0.35)]">
+      <CardHeader className="space-y-4 border-b border-slate-200/80 px-6 pb-8 pt-8 text-center dark:border-white/8">
+        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl border border-slate-200/80 bg-slate-50 text-slate-600 dark:border-white/8 dark:bg-white/4 dark:text-slate-300">
+          <LockKeyhole size={24} strokeWidth={2} />
         </div>
-        <CardTitle className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
+        <CardTitle className="text-2xl font-semibold tracking-tight text-slate-900 sm:text-[1.65rem] dark:text-[#f1f4f9]">
           Bienvenido
         </CardTitle>
-        <CardDescription className="text-balance text-base text-slate-500 dark:text-slate-400">
+        <CardDescription className="text-balance text-[15px] leading-relaxed text-slate-600 dark:text-slate-400">
           Ingresa tus credenciales para acceder a la plataforma de la CUN.
         </CardDescription>
       </CardHeader>
-      
-      <CardContent>
+
+      <CardContent className="px-6 pb-8 pt-6">
         <form className="space-y-6" onSubmit={onSubmit} noValidate>
           <div className="space-y-4">
-            <div className="relative group">
+            <div className="group relative">
               <Input
                 label="Correo Institucional"
                 type="email"
                 autoComplete="email"
                 placeholder="nombre.apellido@cun.edu.co"
-                className="pl-10 transition-all duration-200 focus:ring-2 focus:ring-primary/20"
+                className="pl-10 transition-[box-shadow,border-color] duration-200 focus-visible:ring-slate-400/25 dark:focus-visible:ring-white/15"
                 error={errors.email?.message}
                 {...register('email')}
               />
-              <Mail className="absolute left-3 top-[38px] text-slate-400 group-focus-within:text-primary transition-colors" size={18} />
+              <Mail
+                className="pointer-events-none absolute left-3 top-[38px] text-slate-400 transition-colors group-focus-within:text-slate-600 dark:text-slate-500 dark:group-focus-within:text-slate-300"
+                size={18}
+              />
             </div>
 
-            <div className="relative group">
+            <div className="group relative">
               <Input
                 label="Contraseña"
                 type="password"
                 autoComplete="current-password"
                 placeholder="••••••••"
-                className="pl-10 transition-all duration-200 focus:ring-2 focus:ring-primary/20"
+                className="pl-10 transition-[box-shadow,border-color] duration-200 focus-visible:ring-slate-400/25 dark:focus-visible:ring-white/15"
                 error={errors.password?.message}
                 {...register('password')}
               />
-              <LockKeyhole className="absolute left-3 top-[38px] text-slate-400 group-focus-within:text-primary transition-colors" size={18} />
+              <LockKeyhole
+                className="pointer-events-none absolute left-3 top-[38px] text-slate-400 transition-colors group-focus-within:text-slate-600 dark:text-slate-500 dark:group-focus-within:text-slate-300"
+                size={18}
+              />
             </div>
           </div>
 
           {formError && (
-            <div className="flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-600 dark:border-red-900/50 dark:bg-red-950/20">
-              <AlertCircle size={16} />
+            <div className="flex items-center gap-2 rounded-lg border border-red-200/90 bg-red-50 p-3 text-sm text-red-700 dark:border-red-500/25 dark:bg-red-950/35 dark:text-red-200">
+              <AlertCircle size={16} className="shrink-0" />
               <p>{formError}</p>
             </div>
           )}
 
-          <div className="pt-2">
-            <Button 
-              type="submit" 
-              className="w-full text-base font-semibold shadow-lg shadow-primary/20 transition-all hover:scale-[1.02] active:scale-[0.98]" 
-              size="lg" 
+          <div className="pt-1">
+            <Button
+              type="submit"
+              size="lg"
               isLoading={isSubmitting}
+              className="w-full border border-slate-300/80 bg-slate-900 text-[15px] font-semibold text-white shadow-sm hover:bg-slate-800 focus-visible:ring-slate-400/40 dark:border-white/15 dark:bg-[#e8eaef] dark:text-[#0d1117] dark:shadow-[0_1px_0_0_rgb(255_255_255/0.35)_inset] dark:hover:bg-[#f2f4f7] dark:focus-visible:ring-white/25"
             >
-              Iniciar Sesión
+              Iniciar sesión
             </Button>
           </div>
         </form>
-
-        <div className="mt-8 text-center text-sm">
-          <p className="text-slate-500 dark:text-slate-400">
-            ¿Problemas con el acceso?{' '}
-            <a href="#" className="font-medium text-primary hover:underline underline-offset-4 transition-colors">
-              Contactar a soporte
-            </a>
-          </p>
-        </div>
       </CardContent>
     </Card>
   );
