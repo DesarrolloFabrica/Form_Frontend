@@ -1,6 +1,7 @@
+import { createLicencias, listLicencias } from '@/api/licencias';
+import type { LicenciasPayload, LicenciasRecord } from '@/api/types';
 import { FormActionBar, FormFieldGrid, FormSection } from '@/components/FormLayout';
 import { Button, Input, type SelectOption, Select } from '@/components/UiPrimitives';
-import { api } from '@/lib/api';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useCallback, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -51,30 +52,13 @@ const defaultValues: LicenciasFormInput = {
   moneda: '',
 };
 
-type LicenciaRow = {
-  id?: number;
-  nombreLicencias?: string;
-  correoVinculado?: string;
-  fechaCompra?: string;
-  fechaFinalizacion?: string;
-  tipoLicencia?: string;
-  coordinacion?: string;
-  costo?: string;
-  moneda?: string;
-};
-
-function parseList(data: unknown): LicenciaRow[] {
-  if (!Array.isArray(data)) return [];
-  return data.filter((x) => x && typeof x === 'object') as LicenciaRow[];
-}
-
 function formatCostoString(n: number): string {
-  return n.toFixed(2);
+  return String(Math.trunc(n));
 }
 
 export function InventoryLicencias() {
   const [savingDraft, setSavingDraft] = useState(false);
-  const [rows, setRows] = useState<LicenciaRow[]>([]);
+  const [rows, setRows] = useState<LicenciasRecord[]>([]);
   const [listLoading, setListLoading] = useState(true);
   const [listError, setListError] = useState<string | null>(null);
 
@@ -82,8 +66,7 @@ export function InventoryLicencias() {
     setListError(null);
     setListLoading(true);
     try {
-      const { data } = await api.get<unknown>('/licencias');
-      setRows(parseList(data));
+      setRows(await listLicencias());
     } catch {
       setListError('No se pudo cargar el listado.');
       setRows([]);
@@ -120,7 +103,7 @@ export function InventoryLicencias() {
   };
 
   const onValidSubmit = handleSubmit(async (values) => {
-    const body = {
+    const body: LicenciasPayload = {
       nombreLicencias: values.nombreLicencias.trim(),
       correoVinculado: values.correoVinculado.trim().toLowerCase(),
       fechaCompra: values.fechaCompra,
@@ -132,7 +115,7 @@ export function InventoryLicencias() {
     };
 
     try {
-      await api.post('/licencias', body);
+      await createLicencias(body);
       toast.success('Registro creado correctamente.');
       reset(defaultValues);
       await loadList();

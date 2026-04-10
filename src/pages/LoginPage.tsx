@@ -20,9 +20,9 @@ export function LoginPage() {
           {appConfig.name}
         </h1>
         <p className="text-sm text-muted">
-          Accede al panel de inventarios. Usa un correo de prueba que contenga{' '}
-          <span className="text-foreground/80">fabrica</span> o{' '}
-          <span className="text-foreground/80">desarrollo</span>, o los correos mock del equipo.
+          Accede con el usuario registrado en la API. Los roles válidos son{' '}
+          <span className="text-foreground/80">fabrica</span> y{' '}
+          <span className="text-foreground/80">desarrollo</span>.
         </p>
       </div>
       <LoginForm />

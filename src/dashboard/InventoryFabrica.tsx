@@ -1,6 +1,7 @@
+import { createFabrica, listFabrica } from '@/api/fabrica';
+import type { FabricaPayload, FabricaRecord } from '@/api/types';
 import { FormActionBar, FormFieldGrid, FormSection, FormSectionTitle } from '@/components/FormLayout';
 import { Button, Input, type SelectOption, Select, Textarea } from '@/components/UiPrimitives';
-import { api } from '@/lib/api';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useCallback, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -103,26 +104,9 @@ const defaultValues: FabricaFormInput = {
   cantidadMaterias: 0,
 };
 
-type FabricaRow = {
-  id?: number;
-  tipoRequisicion?: string;
-  solicitante?: string;
-  fechaSolicitudOt?: string;
-  fechaEntrega?: string;
-  estado?: string;
-  escuela?: string;
-  programa?: string;
-  modalidad?: string;
-};
-
-function parseList(data: unknown): FabricaRow[] {
-  if (!Array.isArray(data)) return [];
-  return data.filter((x) => x && typeof x === 'object') as FabricaRow[];
-}
-
 export function InventoryFabrica() {
   const [savingDraft, setSavingDraft] = useState(false);
-  const [rows, setRows] = useState<FabricaRow[]>([]);
+  const [rows, setRows] = useState<FabricaRecord[]>([]);
   const [listLoading, setListLoading] = useState(true);
   const [listError, setListError] = useState<string | null>(null);
 
@@ -130,8 +114,7 @@ export function InventoryFabrica() {
     setListError(null);
     setListLoading(true);
     try {
-      const { data } = await api.get<unknown>('/fabrica');
-      setRows(parseList(data));
+      setRows(await listFabrica());
     } catch {
       setListError('No se pudo cargar el listado.');
       setRows([]);
@@ -168,7 +151,7 @@ export function InventoryFabrica() {
   };
 
   const onValidSubmit = handleSubmit(async (values) => {
-    const body: Record<string, string | number> = {
+    const body: FabricaPayload = {
       tipoRequisicion: values.tipoRequisicion.trim(),
       cantidadModulos: values.cantidadModulos,
       cantidadGranulos: values.cantidadGranulos,
@@ -177,7 +160,6 @@ export function InventoryFabrica() {
       fechaSolicitudOt: values.fechaSolicitudOt,
       solicitante: values.solicitante.trim(),
       fechaEntrega: values.fechaEntrega,
-      entregaInsumo: values.entregaInsumo.trim(),
       tipoPaquete: values.tipoPaquete.trim(),
       canalSolicitud: values.canalSolicitud.trim(),
       estado: values.estado.trim(),
@@ -190,9 +172,11 @@ export function InventoryFabrica() {
 
     const enlace = values.enlaceInsumo.trim();
     if (enlace) body.enlaceInsumo = enlace;
+    const entregaInsumo = values.entregaInsumo.trim();
+    if (entregaInsumo) body.entregaInsumo = entregaInsumo;
 
     try {
-      await api.post('/fabrica', body);
+      await createFabrica(body);
       toast.success('Registro creado correctamente.');
       reset(defaultValues);
       await loadList();

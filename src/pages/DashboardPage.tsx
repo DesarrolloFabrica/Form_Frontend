@@ -1,3 +1,5 @@
+import { listLogs } from '@/api/logs';
+import type { LogRecord } from '@/api/types';
 import { SectionWrapper } from '@/components/AppShell';
 import { EmptyState } from '@/components/Feedback';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/UiSurfaces';
@@ -5,20 +7,7 @@ import { ItemGrid } from '@/dashboard/ItemGrid';
 import { WelcomeBanner } from '@/dashboard/WelcomeBanner';
 import { usePageTitle } from '@/hooks/usePageTitle';
 import { useRoleNavigation } from '@/hooks/useRoleNavigation';
-import { api } from '@/lib/api';
 import { useCallback, useEffect, useState } from 'react';
-
-type LogRow = {
-  id?: number;
-  fechaIngreso?: string;
-  actor?: string;
-  tipo?: string;
-};
-
-function parseLogs(data: unknown): LogRow[] {
-  if (!Array.isArray(data)) return [];
-  return data.filter((x) => x && typeof x === 'object') as LogRow[];
-}
 
 function formatLogDate(value: string | undefined): string {
   if (!value) return '—';
@@ -29,14 +18,13 @@ function formatLogDate(value: string | undefined): string {
 export function DashboardPage() {
   usePageTitle('Panel principal');
   const { dashboardItems } = useRoleNavigation();
-  const [logs, setLogs] = useState<LogRow[]>([]);
+  const [logs, setLogs] = useState<LogRecord[]>([]);
   const [logsStatus, setLogsStatus] = useState<'idle' | 'loading' | 'ok' | 'error'>('idle');
 
   const loadLogs = useCallback(async () => {
     setLogsStatus('loading');
     try {
-      const { data } = await api.get<unknown>('/logs');
-      setLogs(parseLogs(data).slice(0, 8));
+      setLogs((await listLogs()).slice(0, 8));
       setLogsStatus('ok');
     } catch {
       setLogs([]);

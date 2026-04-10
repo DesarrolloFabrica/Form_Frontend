@@ -1,6 +1,7 @@
+import { createDesarrollo, listDesarrollo } from '@/api/desarrollo';
+import type { DesarrolloPayload, DesarrolloRecord } from '@/api/types';
 import { FormActionBar, FormFieldGrid, FormSection } from '@/components/FormLayout';
 import { Button, Input, type SelectOption, Select, Textarea } from '@/components/UiPrimitives';
-import { api } from '@/lib/api';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useCallback, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -35,24 +36,9 @@ const defaultValues: DesarrolloFormInput = {
   observaciones: '',
 };
 
-type DesarrolloRow = {
-  id?: number;
-  nombreProyecto?: string;
-  fechaSolicitud?: string;
-  fechaEntrega?: string;
-  solicitante?: string;
-  estado?: string;
-  observaciones?: string | null;
-};
-
-function parseList(data: unknown): DesarrolloRow[] {
-  if (!Array.isArray(data)) return [];
-  return data.filter((x) => x && typeof x === 'object') as DesarrolloRow[];
-}
-
 export function InventoryDesarrollo() {
   const [savingDraft, setSavingDraft] = useState(false);
-  const [rows, setRows] = useState<DesarrolloRow[]>([]);
+  const [rows, setRows] = useState<DesarrolloRecord[]>([]);
   const [listLoading, setListLoading] = useState(true);
   const [listError, setListError] = useState<string | null>(null);
 
@@ -60,8 +46,7 @@ export function InventoryDesarrollo() {
     setListError(null);
     setListLoading(true);
     try {
-      const { data } = await api.get<unknown>('/desarrollo');
-      setRows(parseList(data));
+      setRows(await listDesarrollo());
     } catch {
       setListError('No se pudo cargar el listado.');
       setRows([]);
@@ -98,7 +83,7 @@ export function InventoryDesarrollo() {
   };
 
   const onValidSubmit = handleSubmit(async (values) => {
-    const body: Record<string, string> = {
+    const body: DesarrolloPayload = {
       nombreProyecto: values.nombreProyecto.trim(),
       fechaSolicitud: values.fechaSolicitud,
       fechaEntrega: values.fechaEntrega,
@@ -109,7 +94,7 @@ export function InventoryDesarrollo() {
     if (obs) body.observaciones = obs;
 
     try {
-      await api.post('/desarrollo', body);
+      await createDesarrollo(body);
       toast.success('Registro creado correctamente.');
       reset(defaultValues);
       await loadList();
