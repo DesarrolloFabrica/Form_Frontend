@@ -57,7 +57,6 @@ function formatCostoString(n: number): string {
 }
 
 export function InventoryLicencias() {
-  const [savingDraft, setSavingDraft] = useState(false);
   const [rows, setRows] = useState<LicenciasRecord[]>([]);
   const [listLoading, setListLoading] = useState(true);
   const [listError, setListError] = useState<string | null>(null);
@@ -83,24 +82,11 @@ export function InventoryLicencias() {
     register,
     handleSubmit,
     reset,
-    getValues,
     formState: { errors, isSubmitting },
   } = useForm<LicenciasFormInput>({
     resolver: zodResolver(licenciasSchema),
     defaultValues,
   });
-
-  const onSaveDraft = async () => {
-    setSavingDraft(true);
-    try {
-      void getValues();
-      toast.success('Borrador guardado localmente.');
-    } catch {
-      toast.error('No se pudo guardar el borrador.');
-    } finally {
-      setSavingDraft(false);
-    }
-  };
 
   const onValidSubmit = handleSubmit(async (values) => {
     const body: LicenciasPayload = {
@@ -191,9 +177,6 @@ export function InventoryLicencias() {
         </FormSection>
 
         <FormActionBar>
-          <Button type="button" variant="secondary" isLoading={savingDraft} onClick={() => void onSaveDraft()}>
-            Guardar borrador
-          </Button>
           <Button type="submit" isLoading={isSubmitting}>
             Enviar
           </Button>

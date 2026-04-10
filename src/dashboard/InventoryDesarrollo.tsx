@@ -37,7 +37,6 @@ const defaultValues: DesarrolloFormInput = {
 };
 
 export function InventoryDesarrollo() {
-  const [savingDraft, setSavingDraft] = useState(false);
   const [rows, setRows] = useState<DesarrolloRecord[]>([]);
   const [listLoading, setListLoading] = useState(true);
   const [listError, setListError] = useState<string | null>(null);
@@ -63,24 +62,11 @@ export function InventoryDesarrollo() {
     register,
     handleSubmit,
     reset,
-    getValues,
     formState: { errors, isSubmitting },
   } = useForm<DesarrolloFormInput>({
     resolver: zodResolver(desarrolloSchema),
     defaultValues,
   });
-
-  const onSaveDraft = async () => {
-    setSavingDraft(true);
-    try {
-      void getValues();
-      toast.success('Borrador guardado localmente.');
-    } catch {
-      toast.error('No se pudo guardar el borrador.');
-    } finally {
-      setSavingDraft(false);
-    }
-  };
 
   const onValidSubmit = handleSubmit(async (values) => {
     const body: DesarrolloPayload = {
@@ -153,9 +139,6 @@ export function InventoryDesarrollo() {
         </FormSection>
 
         <FormActionBar>
-          <Button type="button" variant="secondary" isLoading={savingDraft} onClick={() => void onSaveDraft()}>
-            Guardar borrador
-          </Button>
           <Button type="submit" isLoading={isSubmitting}>
             Enviar
           </Button>

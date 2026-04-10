@@ -17,22 +17,21 @@ const tipoRequisicionOptions: SelectOption[] = [
 
 const entregaInsumoOptions: SelectOption[] = [
   { value: 'Pendiente', label: 'Pendiente' },
-  { value: 'Sí', label: 'Sí' },
-  { value: 'No', label: 'No' },
-  { value: 'Parcial', label: 'Parcial' },
+  { value: 'Entregado', label: 'Entregado' },
+  { value: 'En curso', label: 'En curso' },
 ];
 
 const tipoPaqueteOptions: SelectOption[] = [
-  { value: 'Estandar', label: 'Estándar' },
-  { value: 'Express', label: 'Express' },
-  { value: 'Consolidado', label: 'Consolidado' },
+  { value: 'SCORM', label: 'SCORM' },
+  { value: 'Notebook', label: 'Notebook' },
 ];
 
 const canalSolicitudOptions: SelectOption[] = [
   { value: 'Web', label: 'Web' },
-  { value: 'Teams', label: 'Teams' },
   { value: 'Correo', label: 'Correo' },
-  { value: 'Formulario interno', label: 'Formulario interno' },
+  { value: 'CUN 360', label: 'CUN 360' },
+  { value: 'Meet', label: 'Meet' },
+  { value: 'Acta', label: 'Acta' },
 ];
 
 const estadoFabricaOptions: SelectOption[] = [
@@ -45,7 +44,6 @@ const estadoFabricaOptions: SelectOption[] = [
 const tipoProgresoOptions: SelectOption[] = [
   { value: 'Inicial', label: 'Inicial' },
   { value: 'En curso', label: 'En curso' },
-  { value: 'Avanzado', label: 'Avanzado' },
   { value: 'Cerrado', label: 'Cerrado' },
 ];
 
@@ -105,7 +103,6 @@ const defaultValues: FabricaFormInput = {
 };
 
 export function InventoryFabrica() {
-  const [savingDraft, setSavingDraft] = useState(false);
   const [rows, setRows] = useState<FabricaRecord[]>([]);
   const [listLoading, setListLoading] = useState(true);
   const [listError, setListError] = useState<string | null>(null);
@@ -131,24 +128,11 @@ export function InventoryFabrica() {
     register,
     handleSubmit,
     reset,
-    getValues,
     formState: { errors, isSubmitting },
   } = useForm<FabricaFormInput>({
     resolver: zodResolver(fabricaSchema),
     defaultValues,
   });
-
-  const onSaveDraft = async () => {
-    setSavingDraft(true);
-    try {
-      void getValues();
-      toast.success('Borrador guardado localmente.');
-    } catch {
-      toast.error('No se pudo guardar el borrador.');
-    } finally {
-      setSavingDraft(false);
-    }
-  };
 
   const onValidSubmit = handleSubmit(async (values) => {
     const body: FabricaPayload = {
@@ -318,9 +302,6 @@ export function InventoryFabrica() {
         </FormSection>
 
         <FormActionBar>
-          <Button type="button" variant="secondary" isLoading={savingDraft} onClick={() => void onSaveDraft()}>
-            Guardar borrador
-          </Button>
           <Button type="submit" isLoading={isSubmitting}>
             Enviar
           </Button>
