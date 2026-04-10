@@ -18,11 +18,15 @@ export function Logo({ className, size = 'md' }: LogoProps) {
     <div className={cn('flex items-center gap-2', className)}>
       <div
         className={cn(
-          'flex items-center justify-center rounded-lg bg-accent font-bold text-white shadow-lg shadow-accent/25',
-          size === 'sm' ? 'size-8 text-xs' : 'size-10 text-sm',
+          'flex shrink-0 items-center justify-center rounded-xl bg-[#071a2e] px-2 py-1.5 ring-1 ring-sky-950/50',
+          size === 'sm' ? 'h-8' : 'h-11',
         )}
       >
-        FC
+        <img
+          src="/Logo.png"
+          alt={`${appConfig.shortName} logo`}
+          className={cn('w-auto object-contain', size === 'sm' ? 'max-h-5' : 'max-h-7')}
+        />
       </div>
       <div className="leading-tight">
         <p className={cn('font-semibold text-foreground', size === 'sm' ? 'text-sm' : 'text-base')}>
