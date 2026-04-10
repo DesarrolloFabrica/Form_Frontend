@@ -1,9 +1,5 @@
-import { Button } from '@/components/Button';
-import { FormActionBar } from '@/components/FormActionBar';
-import { FormFieldGrid, FormSection, FormSectionTitle } from '@/components/FormFieldGrid';
-import { Input } from '@/components/Input';
-import { type SelectOption, Select } from '@/components/Select';
-import { Textarea } from '@/components/Textarea';
+import { FormActionBar, FormFieldGrid, FormSection, FormSectionTitle } from '@/components/FormLayout';
+import { Button, Input, type SelectOption, Select, Textarea } from '@/components/UiPrimitives';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';

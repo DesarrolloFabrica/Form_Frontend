@@ -1,7 +1,5 @@
-import { BackButton } from '@/components/BackButton';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/Card';
-import { PageHeader } from '@/components/PageHeader';
-import { SectionWrapper } from '@/components/SectionWrapper';
+import { BackButton, PageHeader, SectionWrapper } from '@/components/AppShell';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/UiSurfaces';
 import { InventoryFabrica } from '@/dashboard/InventoryFabrica';
 import { usePageTitle } from '@/hooks/usePageTitle';
 import { ROUTES } from '@/utils/routeHelpers';

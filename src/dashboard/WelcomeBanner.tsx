@@ -1,4 +1,4 @@
-import { Badge } from '@/components/Badge';
+import { Badge } from '@/components/UiPrimitives';
 import { useAuth } from '@/hooks/useAuth';
 import type { UserRole } from '@/models';
 

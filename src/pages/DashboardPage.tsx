@@ -1,5 +1,5 @@
-import { EmptyState } from '@/components/EmptyState';
-import { SectionWrapper } from '@/components/SectionWrapper';
+import { EmptyState } from '@/components/Feedback';
+import { SectionWrapper } from '@/components/AppShell';
 import { ItemGrid } from '@/dashboard/ItemGrid';
 import { WelcomeBanner } from '@/dashboard/WelcomeBanner';
 import { usePageTitle } from '@/hooks/usePageTitle';

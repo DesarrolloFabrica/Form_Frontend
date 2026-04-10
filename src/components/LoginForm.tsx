@@ -1,6 +1,5 @@
-import { Button } from '@/components/Button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/Card';
-import { Input } from '@/components/Input';
+import { Button, Input } from '@/components/UiPrimitives';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/UiSurfaces';
 import { useAuth } from '@/hooks/useAuth';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useState } from 'react';

@@ -1,5 +1,4 @@
-import { AppSidebar } from '@/components/AppSidebar';
-import { AppTopbar } from '@/components/AppTopbar';
+import { AppSidebar, AppTopbar } from '@/components/AppShell';
 import { Outlet } from 'react-router-dom';
 
 export function DashboardLayout() {

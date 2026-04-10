@@ -1,8 +1,6 @@
 import { AuthLayout } from '@/app/layouts/AuthLayout';
 import { DashboardLayout } from '@/app/layouts/DashboardLayout';
-import { ProtectedRoute } from '@/components/ProtectedRoute';
-import { RoleGuard } from '@/components/RoleGuard';
-import { SmartRedirect } from '@/components/SmartRedirect';
+import { ProtectedRoute, RoleGuard, SmartRedirect } from '@/components/RouteGuards';
 import { DashboardPage } from '@/pages/DashboardPage';
 import { InventoryDesarrolloPage } from '@/pages/InventoryDesarrolloPage';
 import { InventoryFabricaPage } from '@/pages/InventoryFabricaPage';

@@ -1,4 +1,4 @@
-import { Logo } from '@/components/Logo';
+import { Logo } from '@/components/AppShell';
 import type { ReactNode } from 'react';
 
 export function AuthLayout({ children }: { children: ReactNode }) {

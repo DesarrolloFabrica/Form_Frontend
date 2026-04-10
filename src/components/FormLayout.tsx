@@ -1,5 +1,5 @@
 import { cn } from '@/lib/utils';
-import type { HTMLAttributes } from 'react';
+import type { HTMLAttributes, ReactNode } from 'react';
 
 export function FormFieldGrid({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
   return (
@@ -17,5 +17,23 @@ export function FormSection({ className, ...props }: HTMLAttributes<HTMLDivEleme
 export function FormSectionTitle({ className, ...props }: HTMLAttributes<HTMLHeadingElement>) {
   return (
     <h3 className={cn('text-sm font-semibold uppercase tracking-wide text-muted', className)} {...props} />
+  );
+}
+
+export interface FormActionBarProps {
+  children: ReactNode;
+  className?: string;
+}
+
+export function FormActionBar({ children, className }: FormActionBarProps) {
+  return (
+    <div
+      className={cn(
+        'flex flex-col-reverse gap-3 border-t border-border/70 pt-5 sm:flex-row sm:justify-end',
+        className,
+      )}
+    >
+      {children}
+    </div>
   );
 }
