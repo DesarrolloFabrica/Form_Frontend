@@ -25,24 +25,18 @@ const licencias: DashboardNavItem = {
   icon: 'license',
 };
 
-export const dashboardItemsByRole: Record<
-  Extract<UserRole, 'FABRICA_COORDINADOR' | 'DESARROLLO'>,
-  DashboardNavItem[]
-> = {
-  FABRICA_COORDINADOR: [fabricaPrimary, licencias],
-  DESARROLLO: [desarrolloPrimary, licencias],
+export const dashboardItemsByRole: Record<UserRole, DashboardNavItem[]> = {
+  fabrica: [fabricaPrimary, licencias],
+  desarrollo: [desarrolloPrimary, licencias],
 };
 
-export const sidebarNavByRole: Record<
-  Extract<UserRole, 'FABRICA_COORDINADOR' | 'DESARROLLO'>,
-  { label: string; href: string }[]
-> = {
-  FABRICA_COORDINADOR: [
+export const sidebarNavByRole: Record<UserRole, { label: string; href: string }[]> = {
+  fabrica: [
     { label: 'Panel', href: ROUTES.DASHBOARD },
     { label: 'Inventario Fábrica', href: ROUTES.INVENTORY_FABRICA },
     { label: 'Inventario Licencias', href: ROUTES.INVENTORY_LICENCIAS },
   ],
-  DESARROLLO: [
+  desarrollo: [
     { label: 'Panel', href: ROUTES.DASHBOARD },
     { label: 'Inventario Desarrollo', href: ROUTES.INVENTORY_DESARROLLO },
     { label: 'Inventario Licencias', href: ROUTES.INVENTORY_LICENCIAS },

@@ -1,11 +1,12 @@
-export const USER_ROLES = ['FABRICA_COORDINADOR', 'DESARROLLO', 'ADMIN'] as const;
+export const USER_ROLES = ['fabrica', 'desarrollo'] as const;
 
 export type UserRole = (typeof USER_ROLES)[number];
 
 export interface AuthUser {
-  id: string;
-  email: string;
-  displayName: string;
+  id: number;
+  nombre: string;
+  correo: string;
+  rol: UserRole;
 }
 
 export interface DashboardNavItem {

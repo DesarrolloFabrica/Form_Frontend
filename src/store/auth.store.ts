@@ -1,106 +1,81 @@
-import {
-  authStorageKey,
-  desarrolloEmailSubstring,
-  explicitDesarrolloEmails,
-  explicitFabricaEmails,
-  fabricaEmailSubstring,
-  loginEnabledRoles,
-} from '@/config/auth.config';
 import type { AuthUser, UserRole } from '@/models';
+import axios from 'axios';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
-const AUTH_DELAY_MS = 450;
+const AUTH_STORAGE_KEY = 'forms-cun-auth';
 
-function normalizeEmail(email: string): string {
-  return email.trim().toLowerCase();
+const loginBaseUrl = import.meta.env.VITE_API_URL ?? 'http://localhost:3000/api';
+
+function isUserRole(value: unknown): value is UserRole {
+  return value === 'fabrica' || value === 'desarrollo';
 }
 
-function resolveUserRoleFromEmail(email: string): UserRole | null {
-  const normalized = normalizeEmail(email);
-
-  if (explicitFabricaEmails.some((e) => normalizeEmail(e) === normalized)) {
-    return loginEnabledRoles.includes('FABRICA_COORDINADOR') ? 'FABRICA_COORDINADOR' : null;
+function parseAuthUser(raw: unknown): AuthUser | null {
+  if (!raw || typeof raw !== 'object') return null;
+  const o = raw as Record<string, unknown>;
+  let idNum: number | null = null;
+  if (typeof o.id === 'number' && Number.isFinite(o.id)) idNum = o.id;
+  else if (typeof o.id === 'string' && /^\d+$/.test(o.id)) idNum = Number(o.id);
+  const nombre = o.nombre;
+  const correo = o.correo;
+  const rol = o.rol;
+  if (idNum === null || typeof nombre !== 'string' || typeof correo !== 'string' || !isUserRole(rol)) {
+    return null;
   }
-  if (explicitDesarrolloEmails.some((e) => normalizeEmail(e) === normalized)) {
-    return loginEnabledRoles.includes('DESARROLLO') ? 'DESARROLLO' : null;
-  }
-
-  if (normalized.includes(fabricaEmailSubstring.toLowerCase())) {
-    return 'FABRICA_COORDINADOR';
-  }
-  if (normalized.includes(desarrolloEmailSubstring.toLowerCase())) {
-    return 'DESARROLLO';
-  }
-
-  return null;
-}
-
-function buildMockUserFromEmail(email: string): AuthUser {
-  const local = email.split('@')[0] ?? 'usuario';
-  const displayName = local
-    .split(/[._-]/)
-    .filter(Boolean)
-    .map((p) => p.charAt(0).toUpperCase() + p.slice(1).toLowerCase())
-    .join(' ');
-
-  return {
-    id: `mock-${local}`,
-    email: email.trim().toLowerCase(),
-    displayName: displayName || 'Usuario',
-  };
+  return { id: idNum, nombre, correo, rol };
 }
 
 export interface AuthState {
+  accessToken: string | null;
   user: AuthUser | null;
-  role: UserRole | null;
   isAuthenticated: boolean;
   hasHydrated: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  login: (correo: string, contrasena: string) => Promise<void>;
   logout: () => void;
-  setSession: (user: AuthUser, role: UserRole) => void;
-  hydrateSession: () => void;
 }
 
 export const useAuthStore = create<AuthState>()(
   persist(
     (set) => ({
+      accessToken: null,
       user: null,
-      role: null,
       isAuthenticated: false,
       hasHydrated: false,
 
-      setSession: (user, role) => {
-        set({ user, role, isAuthenticated: true });
-      },
+      login: async (correo, contrasena) => {
+        const { data } = await axios.post<{
+          accessToken: string;
+          user: unknown;
+        }>(`${loginBaseUrl}/auth/login`, { correo: correo.trim(), contrasena });
 
-      login: async (email, password) => {
-        void password;
-        await new Promise((r) => setTimeout(r, AUTH_DELAY_MS));
-        const role = resolveUserRoleFromEmail(email);
-        if (!role) {
-          throw new Error('El correo no pertenece a un grupo autorizado.');
+        const user = parseAuthUser(data.user);
+        if (!user || typeof data.accessToken !== 'string') {
+          throw new Error('Respuesta de inicio de sesión no válida.');
         }
-        const user = buildMockUserFromEmail(email);
-        set({ user, role, isAuthenticated: true });
+
+        set({
+          accessToken: data.accessToken,
+          user,
+          isAuthenticated: true,
+        });
       },
 
       logout: () => {
-        set({ user: null, role: null, isAuthenticated: false });
-      },
-
-      hydrateSession: () => {
-        queueMicrotask(() => {
-          void useAuthStore.persist.rehydrate();
+        localStorage.removeItem(AUTH_STORAGE_KEY);
+        set({
+          accessToken: null,
+          user: null,
+          isAuthenticated: false,
         });
       },
     }),
     {
-      name: authStorageKey,
+      name: AUTH_STORAGE_KEY,
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({
+        accessToken: state.accessToken,
         user: state.user,
-        role: state.role,
         isAuthenticated: state.isAuthenticated,
       }),
     },

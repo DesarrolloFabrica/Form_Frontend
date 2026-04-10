@@ -17,15 +17,15 @@ export const roleRestrictedPaths: {
 }[] = [
   {
     path: ROUTES.INVENTORY_FABRICA,
-    allowedRoles: ['FABRICA_COORDINADOR', 'ADMIN'],
+    allowedRoles: ['fabrica'],
   },
   {
     path: ROUTES.INVENTORY_DESARROLLO,
-    allowedRoles: ['DESARROLLO', 'ADMIN'],
+    allowedRoles: ['desarrollo'],
   },
   {
     path: ROUTES.INVENTORY_LICENCIAS,
-    allowedRoles: ['FABRICA_COORDINADOR', 'DESARROLLO', 'ADMIN'],
+    allowedRoles: ['fabrica', 'desarrollo'],
   },
 ];
 

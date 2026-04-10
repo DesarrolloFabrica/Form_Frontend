@@ -17,7 +17,7 @@ export function InventoryLicenciasPage() {
       <Card>
         <CardHeader>
           <CardTitle>Formulario de licencia</CardTitle>
-          <CardDescription>Módulo compartido entre perfiles. Solo front: sin API externa.</CardDescription>
+          <CardDescription>Módulo compartido entre perfiles; conectado al API corporativo.</CardDescription>
         </CardHeader>
         <CardContent>
           <InventoryLicencias />

@@ -17,7 +17,7 @@ export function InventoryDesarrolloPage() {
       <Card>
         <CardHeader>
           <CardTitle>Formulario de proyecto</CardTitle>
-          <CardDescription>Validación con Zod en el cliente; sin llamadas a servidor en esta versión.</CardDescription>
+          <CardDescription>Alta de proyectos contra el API y listado en tiempo real.</CardDescription>
         </CardHeader>
         <CardContent>
           <InventoryDesarrollo />

@@ -139,8 +139,8 @@ export function AppTopbar() {
         </div>
         <div className="flex items-center gap-3">
           <div className="hidden text-right sm:block">
-            <p className="text-sm font-medium text-foreground">{user?.displayName}</p>
-            <p className="text-xs text-muted">{user?.email}</p>
+            <p className="text-sm font-medium text-foreground">{user?.nombre}</p>
+            <p className="text-xs text-muted">{user?.correo}</p>
           </div>
           <Button type="button" variant="secondary" size="sm" onClick={() => logout()}>
             <LogOut className="size-4" />

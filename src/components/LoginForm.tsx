@@ -1,12 +1,13 @@
 import { Button, Input } from '@/components/UiPrimitives';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/UiSurfaces';
 import { useAuth } from '@/hooks/useAuth';
+import { ROUTES } from '@/utils/routeHelpers';
 import { zodResolver } from '@hookform/resolvers/zod';
+import axios from 'axios';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import { ROUTES } from '@/utils/routeHelpers';
 import { z } from 'zod';
 
 const loginSchema = z.object({
@@ -16,13 +17,30 @@ const loginSchema = z.object({
 
 type LoginFormValues = z.infer<typeof loginSchema>;
 
+function loginErrorMessage(error: unknown): string {
+  if (axios.isAxiosError(error)) {
+    const status = error.response?.status;
+    if (status === 401 || status === 400) {
+      return 'Credenciales incorrectas o datos inválidos.';
+    }
+    const data = error.response?.data;
+    if (data && typeof data === 'object' && 'message' in data) {
+      const m = (data as { message: unknown }).message;
+      if (typeof m === 'string') return m;
+      if (Array.isArray(m)) return m.filter((x) => typeof x === 'string').join('. ');
+    }
+    if (!error.response) {
+      return 'No fue posible conectar con el servidor.';
+    }
+    return 'No fue posible iniciar sesión. Intenta nuevamente.';
+  }
+  return error instanceof Error ? error.message : 'No fue posible iniciar sesión.';
+}
+
 export function LoginForm() {
   const navigate = useNavigate();
-  const location = useLocation();
   const { login } = useAuth();
   const [formError, setFormError] = useState<string | null>(null);
-
-  const from = (location.state as { from?: string } | null)?.from ?? ROUTES.DASHBOARD;
 
   const {
     register,
@@ -36,11 +54,11 @@ export function LoginForm() {
   const onSubmit = handleSubmit(async (values) => {
     setFormError(null);
     try {
-      await login(values.email, values.password);
+      await login(values.email.trim(), values.password);
       toast.success('Bienvenido');
-      navigate(from, { replace: true });
+      navigate(ROUTES.DASHBOARD, { replace: true });
     } catch (e) {
-      const message = e instanceof Error ? e.message : 'No fue posible iniciar sesión.';
+      const message = loginErrorMessage(e);
       setFormError(message);
       toast.error(message);
     }
@@ -50,7 +68,7 @@ export function LoginForm() {
     <Card className="border-border/80 shadow-2xl shadow-black/40">
       <CardHeader>
         <CardTitle>Iniciar sesión</CardTitle>
-        <CardDescription>Ingresa con tu correo institucional. La contraseña aún no se valida.</CardDescription>
+        <CardDescription>Ingresa el correo y la contraseña registrados en el sistema.</CardDescription>
       </CardHeader>
       <CardContent>
         <form className="space-y-5" onSubmit={onSubmit} noValidate>

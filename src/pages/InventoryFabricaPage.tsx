@@ -17,9 +17,7 @@ export function InventoryFabricaPage() {
       <Card>
         <CardHeader>
           <CardTitle>Formulario de captura</CardTitle>
-          <CardDescription>
-            Los datos se validan en el navegador. Más adelante podrás enlazar un servidor si lo necesitas.
-          </CardDescription>
+          <CardDescription>Los datos se envían al API y el listado se actualiza desde el servidor.</CardDescription>
         </CardHeader>
         <CardContent>
           <InventoryFabrica />

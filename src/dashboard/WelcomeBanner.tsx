@@ -2,22 +2,20 @@ import { Badge } from '@/components/UiPrimitives';
 import { useAuth } from '@/hooks/useAuth';
 import type { UserRole } from '@/models';
 
-const roleLabels: Record<Extract<UserRole, 'FABRICA_COORDINADOR' | 'DESARROLLO'>, string> = {
-  FABRICA_COORDINADOR: 'Coordinación Fábrica',
-  DESARROLLO: 'Desarrollo',
+const roleLabels: Record<UserRole, string> = {
+  fabrica: 'Coordinación Fábrica',
+  desarrollo: 'Desarrollo',
 };
 
-const roleCopy: Record<Extract<UserRole, 'FABRICA_COORDINADOR' | 'DESARROLLO'>, string> = {
-  FABRICA_COORDINADOR:
-    'Gestiona requisiciones de fábrica y el inventario de licencias compartido con otras áreas.',
-  DESARROLLO:
-    'Administra el inventario de proyectos de desarrollo y las licencias corporativas vinculadas.',
+const roleCopy: Record<UserRole, string> = {
+  fabrica: 'Gestiona requisiciones de fábrica y el inventario de licencias compartido con otras áreas.',
+  desarrollo: 'Administra el inventario de proyectos de desarrollo y las licencias corporativas vinculadas.',
 };
 
 export function WelcomeBanner() {
   const { user, role } = useAuth();
 
-  if (role !== 'FABRICA_COORDINADOR' && role !== 'DESARROLLO') {
+  if (role !== 'fabrica' && role !== 'desarrollo') {
     return null;
   }
 
@@ -27,10 +25,10 @@ export function WelcomeBanner() {
       <div className="relative space-y-3">
         <div className="flex flex-wrap items-center gap-2">
           <Badge variant="accent">{roleLabels[role]}</Badge>
-          <span className="text-xs text-muted">Sesión mock · datos locales</span>
+          <span className="text-xs text-muted">Sesión activa</span>
         </div>
         <h2 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
-          Hola, {user?.displayName ?? 'usuario'}
+          Hola, {user?.nombre ?? 'usuario'}
         </h2>
         <p className="max-w-2xl text-sm leading-relaxed text-muted">{roleCopy[role]}</p>
       </div>
