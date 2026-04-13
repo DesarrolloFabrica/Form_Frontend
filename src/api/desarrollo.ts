@@ -1,12 +1,18 @@
 import { apiClient, parseRecordList } from '@/api/client';
 import type { DesarrolloPayload, DesarrolloRecord } from '@/api/types';
 
-export async function createDesarrollo(payload: DesarrolloPayload): Promise<void> {
-  await apiClient.post('/desarrollo', payload);
+function parseRecord(value: unknown): DesarrolloRecord {
+  return value && typeof value === 'object' ? (value as DesarrolloRecord) : ({} as DesarrolloRecord);
 }
 
-export async function createDesarrolloBulk(payload: DesarrolloPayload[]): Promise<void> {
-  await apiClient.post('/desarrollo/bulk', payload);
+export async function createDesarrollo(payload: DesarrolloPayload): Promise<DesarrolloRecord> {
+  const { data } = await apiClient.post<unknown>('/desarrollo', payload);
+  return parseRecord(data);
+}
+
+export async function createDesarrolloBulk(payload: DesarrolloPayload[]): Promise<DesarrolloRecord[]> {
+  const { data } = await apiClient.post<unknown>('/desarrollo/bulk', payload);
+  return parseRecordList<DesarrolloRecord>(data);
 }
 
 export async function listDesarrollo(): Promise<DesarrolloRecord[]> {

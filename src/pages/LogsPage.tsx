@@ -1,28 +1,32 @@
-import { logsApi, type LogRecord } from '@/api/endpoints';
+import { listLogs } from '@/api/logs';
+import type { LogRecord } from '@/api/types';
 import { BackButton, PageHeader, SectionWrapper } from '@/components/AppShell';
 import { Button } from '@/components/UiPrimitives';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/UiSurfaces';
 import { formatDateTime } from '@/lib/formatDate';
-import { notifyApiError } from '@/lib/notifyApiError';
-import { usePageTitle } from '@/hooks/usePageTitle';
 import { ROUTES } from '@/utils/routeHelpers';
 import { useCallback, useEffect, useState } from 'react';
+import { toast } from 'sonner';
 
 export function LogsPage() {
-  usePageTitle('Logs de actividad');
   const [rows, setRows] = useState<LogRecord[]>([]);
   const [loading, setLoading] = useState(true);
 
   const load = useCallback(async () => {
     try {
       setLoading(true);
-      const data = await logsApi.list();
+      const data = await listLogs();
       setRows(data);
     } catch (e) {
-      notifyApiError(e);
+      const message = e instanceof Error ? e.message : 'Ocurrió un error inesperado.';
+      toast.error(message);
     } finally {
       setLoading(false);
     }
+  }, []);
+
+  useEffect(() => {
+    document.title = 'Logs de actividad';
   }, []);
 
   useEffect(() => {
