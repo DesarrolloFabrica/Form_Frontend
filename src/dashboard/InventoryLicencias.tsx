@@ -1,8 +1,8 @@
-import { createLicencias, createLicenciasBulk, listLicencias } from '@/api/licencias';
-import type { LicenciasPayload, LicenciasRecord } from '@/api/types';
+import { createLicencias, createLicenciasBulk } from '@/api/licencias';
+import type { LicenciasPayload } from '@/api/types';
 import { FormActionBar, FormFieldGrid, FormSection } from '@/components/FormLayout';
 import { Button, Input, type SelectOption, Select } from '@/components/UiPrimitives';
-import { useEffect, useState, type FormEvent } from 'react';
+import { useState, type FormEvent } from 'react';
 import { toast } from 'sonner';
 import { z } from 'zod';
 
@@ -60,23 +60,7 @@ function formatCostoString(n: number): string {
 export function InventoryLicencias() {
   const [forms, setForms] = useState<LicenciasFormInput[]>([{ ...emptyLicenciasForm }]);
   const [formErrors, setFormErrors] = useState<LicenciasFormErrors[]>([{}]);
-  const [records, setRecords] = useState<LicenciasRecord[]>([]);
-  const [loadingList, setLoadingList] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-
-  async function loadRecords() {
-    setLoadingList(true);
-    try {
-      const rows = await listLicencias();
-      setRecords(rows);
-    } finally {
-      setLoadingList(false);
-    }
-  }
-
-  useEffect(() => {
-    void loadRecords();
-  }, []);
 
   function onAddForm() {
     setForms((prev) => [...prev, { ...emptyLicenciasForm }]);
@@ -147,7 +131,6 @@ export function InventoryLicencias() {
       }
       setForms([{ ...emptyLicenciasForm }]);
       setFormErrors([{}]);
-      await loadRecords();
     } catch {
       /* interceptor */
     } finally {
@@ -254,39 +237,6 @@ export function InventoryLicencias() {
         </FormActionBar>
       </form>
 
-      <div className="space-y-3">
-        <h3 className="text-sm font-semibold text-foreground">Listado de licencias</h3>
-        {loadingList ? <p className="text-sm text-muted">Cargando registros…</p> : null}
-        {!loadingList && records.length === 0 ? <p className="text-sm text-muted">Sin registros aún.</p> : null}
-        {!loadingList && records.length > 0 ? (
-          <div className="overflow-x-auto rounded-xl border border-border/70">
-            <table className="min-w-full text-left text-sm">
-              <thead className="bg-surface-elevated text-xs uppercase tracking-wide text-muted">
-                <tr>
-                  <th className="px-3 py-2">ID</th>
-                  <th className="px-3 py-2">Licencia</th>
-                  <th className="px-3 py-2">Correo</th>
-                  <th className="px-3 py-2">Correo creador</th>
-                  <th className="px-3 py-2">Moneda</th>
-                  <th className="px-3 py-2">Costo</th>
-                </tr>
-              </thead>
-              <tbody>
-                {records.map((record, index) => (
-                  <tr key={`licencias-row-${record.id ?? index}`} className="border-t border-border/60">
-                    <td className="px-3 py-2">{record.id ?? '-'}</td>
-                    <td className="px-3 py-2">{record.nombreLicencias}</td>
-                    <td className="px-3 py-2">{record.correoVinculado}</td>
-                    <td className="px-3 py-2">{record.createdByEmail ?? '—'}</td>
-                    <td className="px-3 py-2">{record.moneda}</td>
-                    <td className="px-3 py-2">{record.costo}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        ) : null}
-      </div>
     </div>
   );
 }

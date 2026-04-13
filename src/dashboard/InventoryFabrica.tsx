@@ -1,8 +1,8 @@
-import { createFabrica, createFabricaBulk, listFabrica } from '@/api/fabrica';
-import type { FabricaPayload, FabricaRecord } from '@/api/types';
+import { createFabrica, createFabricaBulk } from '@/api/fabrica';
+import type { FabricaPayload } from '@/api/types';
 import { FormActionBar, FormFieldGrid, FormSection, FormSectionTitle } from '@/components/FormLayout';
 import { Button, Input, type SelectOption, Select, Textarea } from '@/components/UiPrimitives';
-import { useEffect, useState, type FormEvent } from 'react';
+import { useState, type FormEvent } from 'react';
 import { toast } from 'sonner';
 import { z } from 'zod';
 
@@ -107,23 +107,7 @@ const emptyFabricaForm: FabricaFormInput = {
 export function InventoryFabrica() {
   const [forms, setForms] = useState<FabricaFormInput[]>([{ ...emptyFabricaForm }]);
   const [formErrors, setFormErrors] = useState<FabricaFormErrors[]>([{}]);
-  const [records, setRecords] = useState<FabricaRecord[]>([]);
-  const [loadingList, setLoadingList] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-
-  async function loadRecords() {
-    setLoadingList(true);
-    try {
-      const rows = await listFabrica();
-      setRecords(rows);
-    } finally {
-      setLoadingList(false);
-    }
-  }
-
-  useEffect(() => {
-    void loadRecords();
-  }, []);
 
   function onAddForm() {
     setForms((prev) => [...prev, { ...emptyFabricaForm }]);
@@ -211,7 +195,6 @@ export function InventoryFabrica() {
       }
       setForms([{ ...emptyFabricaForm }]);
       setFormErrors([{}]);
-      await loadRecords();
     } catch {
       /* interceptor */
     } finally {
@@ -405,39 +388,6 @@ export function InventoryFabrica() {
         </FormActionBar>
       </form>
 
-      <div className="space-y-3">
-        <h3 className="text-sm font-semibold text-foreground">Listado de fábrica</h3>
-        {loadingList ? <p className="text-sm text-muted">Cargando registros…</p> : null}
-        {!loadingList && records.length === 0 ? <p className="text-sm text-muted">Sin registros aún.</p> : null}
-        {!loadingList && records.length > 0 ? (
-          <div className="overflow-x-auto rounded-xl border border-border/70">
-            <table className="min-w-full text-left text-sm">
-              <thead className="bg-surface-elevated text-xs uppercase tracking-wide text-muted">
-                <tr>
-                  <th className="px-3 py-2">ID</th>
-                  <th className="px-3 py-2">Tipo requisición</th>
-                  <th className="px-3 py-2">Solicitante</th>
-                  <th className="px-3 py-2">Correo creador</th>
-                  <th className="px-3 py-2">Estado</th>
-                  <th className="px-3 py-2">Fecha entrega</th>
-                </tr>
-              </thead>
-              <tbody>
-                {records.map((record, index) => (
-                  <tr key={`fabrica-row-${record.id ?? index}`} className="border-t border-border/60">
-                    <td className="px-3 py-2">{record.id ?? '-'}</td>
-                    <td className="px-3 py-2">{record.tipoRequisicion}</td>
-                    <td className="px-3 py-2">{record.solicitante}</td>
-                    <td className="px-3 py-2">{record.createdByEmail ?? '—'}</td>
-                    <td className="px-3 py-2">{record.estado}</td>
-                    <td className="px-3 py-2">{record.fechaEntrega}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        ) : null}
-      </div>
     </div>
   );
 }
