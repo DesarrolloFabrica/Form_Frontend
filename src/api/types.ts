@@ -25,7 +25,7 @@ export interface FabricaPayload {
   cantidadMateriales: number;
   fechaSolicitudOt: string;
   solicitante: string;
-  fechaEntrega: string;
+  fechaEntrega?: string;
   entregaInsumo?: string;
   enlaceInsumo?: string;
   tipoPaquete: string;

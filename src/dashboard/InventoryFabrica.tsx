@@ -52,6 +52,9 @@ const modalidadOptions: SelectOption[] = [
 ];
 
 const dateSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Usa formato YYYY-MM-DD');
+const optionalDateSchema = z
+  .string()
+  .refine((val) => val.trim() === '' || /^\d{4}-\d{2}-\d{2}$/.test(val), 'Usa formato YYYY-MM-DD');
 
 const fabricaSchema = z.object({
   tipoRequisicion: z.string().min(1, 'Selecciona o indica el tipo de requisición'),
@@ -61,7 +64,7 @@ const fabricaSchema = z.object({
   cantidadMateriales: z.coerce.number().min(0, 'Debe ser mayor o igual a 0'),
   fechaSolicitudOt: dateSchema,
   solicitante: z.string().min(1, 'Indica el solicitante'),
-  fechaEntrega: dateSchema,
+  fechaEntrega: optionalDateSchema,
   entregaInsumo: z.string().min(1, 'Indica la entrega de insumo'),
   enlaceInsumo: z
     .string()
@@ -154,7 +157,6 @@ export function InventoryFabrica() {
       cantidadMateriales: Number(values.cantidadMateriales),
       fechaSolicitudOt: values.fechaSolicitudOt,
       solicitante: values.solicitante.trim(),
-      fechaEntrega: values.fechaEntrega,
       tipoPaquete: values.tipoPaquete.trim(),
       canalSolicitud: values.canalSolicitud.trim(),
       estado: values.estado.trim(),
@@ -164,6 +166,9 @@ export function InventoryFabrica() {
       modalidad: values.modalidad.trim(),
       cantidadMaterias: Number(values.cantidadMaterias),
     };
+
+    const fechaEntrega = values.fechaEntrega.trim();
+    if (fechaEntrega) body.fechaEntrega = fechaEntrega;
 
     const enlace = values.enlaceInsumo.trim();
     if (enlace) body.enlaceInsumo = enlace;
@@ -301,7 +306,7 @@ export function InventoryFabrica() {
                   onChange={(event) => onChange(index, 'solicitante', event.target.value)}
                 />
                 <Input
-                  label="Fecha de entrega"
+                  label="Fecha de entrega (opcional)"
                   type="date"
                   error={formErrors[index]?.fechaEntrega}
                   value={form.fechaEntrega}
