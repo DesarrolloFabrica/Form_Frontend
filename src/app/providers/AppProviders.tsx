@@ -1,6 +1,7 @@
 import { useAuthStore } from '@/store/auth.store';
+import { useThemeStore } from '@/store/theme.store';
 import { Toaster } from 'sonner';
-import { type ReactNode, useEffect } from 'react';
+import { type ReactNode, useEffect, useState } from 'react';
 
 function clearInvalidSession() {
   const s = useAuthStore.getState();
@@ -19,6 +20,24 @@ function clearInvalidSession() {
   }
 }
 
+function ThemedToaster() {
+  const theme = useThemeStore((s) => s.theme);
+  const [hydrated, setHydrated] = useState(() => useThemeStore.persist.hasHydrated());
+
+  useEffect(() => {
+    if (useThemeStore.persist.hasHydrated()) {
+      setHydrated(true);
+      return;
+    }
+    return useThemeStore.persist.onFinishHydration(() => setHydrated(true));
+  }, []);
+
+  const domDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark');
+  const sonnerTheme = hydrated ? (theme === 'dark' ? 'dark' : 'light') : domDark ? 'dark' : 'light';
+
+  return <Toaster richColors position="top-right" theme={sonnerTheme} closeButton />;
+}
+
 export function AppProviders({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (useAuthStore.persist.hasHydrated()) {
@@ -34,7 +53,7 @@ export function AppProviders({ children }: { children: ReactNode }) {
   return (
     <>
       {children}
-      <Toaster richColors position="top-right" theme="dark" closeButton />
+      <ThemedToaster />
     </>
   );
 }

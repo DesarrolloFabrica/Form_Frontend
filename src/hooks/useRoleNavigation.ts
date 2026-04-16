@@ -1,4 +1,4 @@
-import { dashboardItemsByRole, sidebarNavByRole } from '@/config/navigation.config';
+import { dashboardItemsByRole, sidebarNavByRole, type SidebarNavConfig } from '@/config/navigation.config';
 import { useAuth } from '@/hooks/useAuth';
 import type { DashboardNavItem, UserRole } from '@/models';
 
@@ -8,16 +8,16 @@ function isAppRole(role: UserRole | null): role is UserRole {
 
 export function useRoleNavigation(): {
   dashboardItems: DashboardNavItem[];
-  sidebarItems: { label: string; href: string }[];
+  sidebarNav: SidebarNavConfig | null;
 } {
   const { role } = useAuth();
 
   if (!isAppRole(role)) {
-    return { dashboardItems: [], sidebarItems: [] };
+    return { dashboardItems: [], sidebarNav: null };
   }
 
   return {
     dashboardItems: dashboardItemsByRole[role],
-    sidebarItems: sidebarNavByRole[role],
+    sidebarNav: sidebarNavByRole[role],
   };
 }

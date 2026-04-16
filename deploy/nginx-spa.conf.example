@@ -1,0 +1,23 @@
+# Ejemplo mínimo para servir el build de Vite (`dist/`) como SPA con React Router (history API).
+# Ajusta `root` y `server_name` según tu despliegue.
+#
+# Copia el contenido relevante a tu `nginx.conf` o monta este fragmento en un contenedor.
+
+server {
+  listen 80;
+  server_name _;
+
+  root /usr/share/nginx/html;
+  index index.html;
+
+  location / {
+    try_files $uri $uri/ /index.html;
+  }
+
+  # Opcional: caché agresiva para assets con hash (Vite emite nombres versionados)
+  location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff2?)$ {
+    try_files $uri =404;
+    expires 7d;
+    add_header Cache-Control "public, immutable";
+  }
+}

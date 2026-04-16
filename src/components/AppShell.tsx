@@ -1,11 +1,13 @@
 import { appConfig } from '@/config/app.config';
+import type { SidebarNavConfig } from '@/config/navigation.config';
+import { ThemeToggle } from '@/components/ThemeToggle';
 import { Button } from '@/components/UiPrimitives';
 import { useAuth } from '@/hooks/useAuth';
 import { useRoleNavigation } from '@/hooks/useRoleNavigation';
 import { cn } from '@/lib/utils';
-import { ArrowLeft, LogOut, Menu } from 'lucide-react';
-import { type ComponentProps, type ReactNode, useState } from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
+import { ArrowLeft, ChevronDown, LogOut, Menu } from 'lucide-react';
+import { type ComponentProps, type ReactNode, useEffect, useId, useState } from 'react';
+import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 
 /* —— Logo —— */
 export interface LogoProps {
@@ -18,11 +20,17 @@ export function Logo({ className, size = 'md' }: LogoProps) {
     <div className={cn('flex items-center gap-2', className)}>
       <div
         className={cn(
-          'flex items-center justify-center rounded-lg bg-accent font-bold text-white shadow-lg shadow-accent/25',
-          size === 'sm' ? 'size-8 text-xs' : 'size-10 text-sm',
+          'flex shrink-0 items-center justify-center rounded-xl bg-[#071a2e] px-2 py-1.5 ring-1 ring-sky-950/50',
+          size === 'sm' ? 'h-8' : 'h-11',
         )}
       >
-        FC
+        <img
+          src="/Logosinfondo.png"
+          alt={`${appConfig.shortName} logo`}
+          width={size === 'sm' ? 32 : 40}
+          height={size === 'sm' ? 32 : 40}
+          className={cn('w-auto object-contain', size === 'sm' ? 'max-h-5' : 'max-h-7')}
+        />
       </div>
       <div className="leading-tight">
         <p className={cn('font-semibold text-foreground', size === 'sm' ? 'text-sm' : 'text-base')}>
@@ -82,34 +90,101 @@ export function PageHeader({ title, description, actions, className }: PageHeade
   );
 }
 
-/* —— AppSidebar —— */
-export function AppSidebar() {
-  const { sidebarItems } = useRoleNavigation();
+function sidebarNavLinkClass(isActive: boolean, nested?: boolean) {
+  return cn(
+    'block rounded-lg text-sm font-medium transition-all duration-200',
+    nested ? 'px-3 py-2' : 'px-3 py-2.5',
+    isActive
+      ? 'bg-accent/15 text-foreground shadow-[inset_0_1px_0_0_rgb(255_255_255/0.06)] ring-1 ring-accent/25 dark:shadow-[inset_0_2px_6px_rgb(0_0_0/0.35)] dark:ring-accent/20'
+      : 'text-muted hover:bg-surface-elevated/80 hover:text-foreground',
+  );
+}
+
+function SidebarNavigation({
+  config,
+  onItemClick,
+}: {
+  config: SidebarNavConfig | null;
+  onItemClick?: () => void;
+}) {
+  const location = useLocation();
+  const groupId = useId();
+  const formularioActive =
+    config?.formulario.some((item) => location.pathname === item.href) ?? false;
+  const [formularioOpen, setFormularioOpen] = useState(formularioActive);
+
+  useEffect(() => {
+    if (formularioActive) setFormularioOpen(true);
+  }, [formularioActive]);
+
+  if (!config) return null;
 
   return (
-    <aside className="hidden w-64 shrink-0 flex-col border-r border-border/80 bg-surface/80 backdrop-blur-md lg:flex">
-      <div className="border-b border-border/70 px-5 py-5">
+    <div className="flex flex-col gap-1">
+      <NavLink
+        to={config.panel.href}
+        onClick={onItemClick}
+        className={({ isActive }) => sidebarNavLinkClass(isActive)}
+      >
+        {config.panel.label}
+      </NavLink>
+
+      <div className="pt-1">
+        <button
+          type="button"
+          id={`${groupId}-trigger`}
+          aria-expanded={formularioOpen}
+          aria-controls={`${groupId}-panel`}
+          onClick={() => setFormularioOpen((open) => !open)}
+          className={cn(
+            'flex w-full items-center justify-between gap-2 rounded-lg px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-muted transition-colors',
+            'hover:bg-surface-elevated hover:text-foreground',
+            formularioOpen && 'text-foreground',
+          )}
+        >
+          Formularios
+          <ChevronDown
+            className={cn('size-4 shrink-0 opacity-70 transition-transform', formularioOpen && 'rotate-180')}
+            aria-hidden
+          />
+        </button>
+        {formularioOpen ? (
+          <div
+            id={`${groupId}-panel`}
+            role="region"
+            aria-labelledby={`${groupId}-trigger`}
+            className="mt-1 space-y-0.5 border-l border-border/60 py-0.5 pl-3 ml-3"
+          >
+            {config.formulario.map((item) => (
+              <NavLink
+                key={item.href}
+                to={item.href}
+                onClick={onItemClick}
+                className={({ isActive }) => sidebarNavLinkClass(isActive, true)}
+              >
+                {item.label}
+              </NavLink>
+            ))}
+          </div>
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
+/* —— AppSidebar —— */
+export function AppSidebar() {
+  const { sidebarNav } = useRoleNavigation();
+
+  return (
+    <aside className="hidden w-64 shrink-0 flex-col border-r border-border/60 bg-surface/75 shadow-[4px_0_32px_-12px_rgb(15_23_42/0.12)] backdrop-blur-xl dark:bg-surface/65 dark:shadow-[4px_0_40px_-8px_rgb(0_0_0/0.5)] lg:flex">
+      <div className="border-b border-border/60 px-5 py-5">
         <Logo size="sm" />
       </div>
-      <nav className="flex flex-1 flex-col gap-1 p-3">
-        {sidebarItems.map((item) => (
-          <NavLink
-            key={item.href}
-            to={item.href}
-            className={({ isActive }) =>
-              cn(
-                'rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
-                isActive
-                  ? 'bg-accent/15 text-foreground shadow-inner'
-                  : 'text-muted hover:bg-surface-elevated hover:text-foreground',
-              )
-            }
-          >
-            {item.label}
-          </NavLink>
-        ))}
+      <nav className="flex flex-1 flex-col p-3">
+        <SidebarNavigation config={sidebarNav} />
       </nav>
-      <div className="border-t border-border/70 p-4 text-xs text-muted">Forms CUN · v0.1</div>
+      <div className="border-t border-border/60 p-4 text-xs text-muted/90">Forms CUN · v0.1</div>
     </aside>
   );
 }
@@ -117,11 +192,11 @@ export function AppSidebar() {
 /* —— AppTopbar —— */
 export function AppTopbar() {
   const { user, logout } = useAuth();
-  const { sidebarItems } = useRoleNavigation();
+  const { sidebarNav } = useRoleNavigation();
   const [open, setOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-30 border-b border-border/80 bg-background/80 backdrop-blur-md">
+    <header className="sticky top-0 z-30 border-b border-border/60 bg-background/75 shadow-sm shadow-slate-900/4 backdrop-blur-xl dark:bg-background/65 dark:shadow-black/25">
       <div className="flex h-16 items-center justify-between gap-4 px-4 sm:px-6">
         <div className="flex items-center gap-3">
           <button
@@ -138,6 +213,7 @@ export function AppTopbar() {
           </div>
         </div>
         <div className="flex items-center gap-3">
+          <ThemeToggle />
           <div className="hidden text-right sm:block">
             <p className="text-sm font-medium text-foreground">{user?.nombre}</p>
             <p className="text-xs text-muted">{user?.correo}</p>
@@ -149,24 +225,8 @@ export function AppTopbar() {
         </div>
       </div>
       {open ? (
-        <div className="border-t border-border/70 bg-surface px-4 py-3 lg:hidden">
-          <div className="flex flex-col gap-1">
-            {sidebarItems.map((item) => (
-              <NavLink
-                key={item.href}
-                to={item.href}
-                onClick={() => setOpen(false)}
-                className={({ isActive }) =>
-                  cn(
-                    'rounded-lg px-3 py-2 text-sm font-medium',
-                    isActive ? 'bg-accent/15 text-foreground' : 'text-muted hover:bg-surface-elevated',
-                  )
-                }
-              >
-                {item.label}
-              </NavLink>
-            ))}
-          </div>
+        <div className="border-t border-border/60 bg-surface/95 px-4 py-3 shadow-lg shadow-slate-900/8 backdrop-blur-xl dark:bg-surface/90 dark:shadow-black/30 lg:hidden">
+          <SidebarNavigation config={sidebarNav} onItemClick={() => setOpen(false)} />
         </div>
       ) : null}
     </header>

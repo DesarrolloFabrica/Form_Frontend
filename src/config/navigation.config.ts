@@ -30,15 +30,30 @@ export const dashboardItemsByRole: Record<UserRole, DashboardNavItem[]> = {
   desarrollo: [desarrolloPrimary, licencias],
 };
 
-export const sidebarNavByRole: Record<UserRole, { label: string; href: string }[]> = {
-  fabrica: [
-    { label: 'Panel', href: ROUTES.DASHBOARD },
-    { label: 'Inventario Fábrica', href: ROUTES.INVENTORY_FABRICA },
-    { label: 'Inventario Licencias', href: ROUTES.INVENTORY_LICENCIAS },
-  ],
-  desarrollo: [
-    { label: 'Panel', href: ROUTES.DASHBOARD },
-    { label: 'Inventario Desarrollo', href: ROUTES.INVENTORY_DESARROLLO },
-    { label: 'Inventario Licencias', href: ROUTES.INVENTORY_LICENCIAS },
-  ],
+export interface SidebarNavLink {
+  label: string;
+  href: string;
+}
+
+/** Panel + inventarios agrupados bajo «Formulario» en el menú lateral. */
+export interface SidebarNavConfig {
+  panel: SidebarNavLink;
+  formulario: SidebarNavLink[];
+}
+
+export const sidebarNavByRole: Record<UserRole, SidebarNavConfig> = {
+  fabrica: {
+    panel: { label: 'Panel', href: ROUTES.DASHBOARD },
+    formulario: [
+      { label: 'Inventario Fábrica', href: ROUTES.INVENTORY_FABRICA },
+      { label: 'Inventario Licencias', href: ROUTES.INVENTORY_LICENCIAS },
+    ],
+  },
+  desarrollo: {
+    panel: { label: 'Panel', href: ROUTES.DASHBOARD },
+    formulario: [
+      { label: 'Inventario Desarrollo', href: ROUTES.INVENTORY_DESARROLLO },
+      { label: 'Inventario Licencias', href: ROUTES.INVENTORY_LICENCIAS },
+    ],
+  },
 };

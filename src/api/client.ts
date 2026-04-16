@@ -1,8 +1,13 @@
+import { getApiBaseUrl } from '@/config/api.config';
 import { useAuthStore } from '@/store/auth.store';
 import axios, { type AxiosError, type InternalAxiosRequestConfig } from 'axios';
 import { toast } from 'sonner';
 
+<<<<<<< HEAD
 export const apiBaseUrl = import.meta.env.VITE_API_URL ?? 'http://localhost:3000/api';
+=======
+export const apiBaseUrl = getApiBaseUrl();
+>>>>>>> 5248fc2eb879fe63f72054929293d51ef0e25558
 
 export const apiClient = axios.create({
   baseURL: apiBaseUrl,

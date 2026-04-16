@@ -1,10 +1,8 @@
-import { createDesarrollo, listDesarrollo } from '@/api/desarrollo';
-import type { DesarrolloPayload, DesarrolloRecord } from '@/api/types';
+import { createDesarrollo, createDesarrolloBulk } from '@/api/desarrollo';
+import type { DesarrolloPayload } from '@/api/types';
 import { FormActionBar, FormFieldGrid, FormSection } from '@/components/FormLayout';
 import { Button, Input, type SelectOption, Select, Textarea } from '@/components/UiPrimitives';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useCallback, useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useState, type FormEvent } from 'react';
 import { toast } from 'sonner';
 import { z } from 'zod';
 
@@ -16,18 +14,21 @@ const estadoOptions: SelectOption[] = [
   { value: 'Detenido', label: 'Detenido' },
 ];
 
+const dateSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Usa formato YYYY-MM-DD');
+
 const desarrolloSchema = z.object({
   nombreProyecto: z.string().min(1, 'Indica el nombre del proyecto'),
-  fechaSolicitud: z.string().min(1, 'Indica la fecha de solicitud'),
-  fechaEntrega: z.string().min(1, 'Indica la fecha de entrega'),
+  fechaSolicitud: dateSchema,
+  fechaEntrega: dateSchema,
   solicitante: z.string().min(1, 'Indica el solicitante'),
   estado: z.string().min(1, 'Selecciona el estado'),
   observaciones: z.string().optional(),
 });
 
 type DesarrolloFormInput = z.input<typeof desarrolloSchema>;
+type DesarrolloFormErrors = Partial<Record<keyof DesarrolloFormInput, string>>;
 
-const defaultValues: DesarrolloFormInput = {
+const emptyDesarrolloForm: DesarrolloFormInput = {
   nombreProyecto: '',
   fechaSolicitud: '',
   fechaEntrega: '',
@@ -37,38 +38,31 @@ const defaultValues: DesarrolloFormInput = {
 };
 
 export function InventoryDesarrollo() {
-  const [rows, setRows] = useState<DesarrolloRecord[]>([]);
-  const [listLoading, setListLoading] = useState(true);
-  const [listError, setListError] = useState<string | null>(null);
+  const [forms, setForms] = useState<DesarrolloFormInput[]>([{ ...emptyDesarrolloForm }]);
+  const [formErrors, setFormErrors] = useState<DesarrolloFormErrors[]>([{}]);
+  const [submitting, setSubmitting] = useState(false);
 
-  const loadList = useCallback(async () => {
-    setListError(null);
-    setListLoading(true);
-    try {
-      setRows(await listDesarrollo());
-    } catch {
-      setListError('No se pudo cargar el listado.');
-      setRows([]);
-    } finally {
-      setListLoading(false);
-    }
-  }, []);
+  function onAddForm() {
+    setForms((prev) => [...prev, { ...emptyDesarrolloForm }]);
+    setFormErrors((prev) => [...prev, {}]);
+  }
 
-  useEffect(() => {
-    void loadList();
-  }, [loadList]);
+  function onRemoveForm(index: number) {
+    if (forms.length === 1) return;
+    setForms((prev) => prev.filter((_, current) => current !== index));
+    setFormErrors((prev) => prev.filter((_, current) => current !== index));
+  }
 
-  const {
-    register,
-    handleSubmit,
-    reset,
-    formState: { errors, isSubmitting },
-  } = useForm<DesarrolloFormInput>({
-    resolver: zodResolver(desarrolloSchema),
-    defaultValues,
-  });
+  function onChange<K extends keyof DesarrolloFormInput>(index: number, field: K, value: DesarrolloFormInput[K]) {
+    setForms((prev) => prev.map((form, current) => (current === index ? { ...form, [field]: value } : form)));
+    setFormErrors((prev) =>
+      prev.map((blockError, current) =>
+        current === index ? { ...blockError, [field]: undefined } : blockError,
+      ),
+    );
+  }
 
-  const onValidSubmit = handleSubmit(async (values) => {
+  function normalizePayload(values: DesarrolloFormInput): DesarrolloPayload {
     const body: DesarrolloPayload = {
       nombreProyecto: values.nombreProyecto.trim(),
       fechaSolicitud: values.fechaSolicitud,
@@ -78,112 +72,132 @@ export function InventoryDesarrollo() {
     };
     const obs = values.observaciones?.trim();
     if (obs) body.observaciones = obs;
+    return body;
+  }
 
-    try {
-      await createDesarrollo(body);
-      toast.success('Registro creado correctamente.');
-      reset(defaultValues);
-      await loadList();
-    } catch {
-      /* toasts / errores vía interceptor o vacío */
+  async function onSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const nextErrors: DesarrolloFormErrors[] = forms.map(() => ({}));
+    const payloads: DesarrolloPayload[] = [];
+
+    forms.forEach((form, index) => {
+      const parsed = desarrolloSchema.safeParse(form);
+      if (!parsed.success) {
+        for (const issue of parsed.error.issues) {
+          const key = issue.path[0] as keyof DesarrolloFormInput | undefined;
+          if (key && !nextErrors[index][key]) {
+            nextErrors[index][key] = issue.message;
+          }
+        }
+        return;
+      }
+      payloads.push(normalizePayload(form));
+    });
+
+    setFormErrors(nextErrors);
+    if (nextErrors.some((block) => Object.keys(block).length > 0)) {
+      toast.error('Revisa los campos obligatorios en los formularios marcados.');
+      return;
     }
-  });
+
+    setSubmitting(true);
+    try {
+      if (payloads.length === 1) {
+        await createDesarrollo(payloads[0]);
+        toast.success('Registro creado correctamente');
+      } else {
+        const created = await createDesarrolloBulk(payloads);
+        toast.success(`Se crearon correctamente ${created.length} registros`);
+      }
+      setForms([{ ...emptyDesarrolloForm }]);
+      setFormErrors([{}]);
+    } catch {
+      /* interceptor */
+    } finally {
+      setSubmitting(false);
+    }
+  }
 
   return (
     <div className="space-y-10">
-      <form className="space-y-8" onSubmit={onValidSubmit} noValidate>
-        <FormSection>
-          <FormFieldGrid>
-            <div className="sm:col-span-2 lg:col-span-3">
-              <Input
-                label="Nombre del proyecto"
-                placeholder="Ej. Portal de servicios estudiantiles"
-                error={errors.nombreProyecto?.message}
-                {...register('nombreProyecto')}
-              />
+      <form className="space-y-8" onSubmit={onSubmit} noValidate>
+        {forms.map((form, index) => (
+          <div key={`desarrollo-form-${index}`} className="space-y-6 rounded-xl border border-border/70 p-4 sm:p-6">
+            <div className="flex items-center justify-between">
+              <p className="text-sm font-semibold text-foreground">Formulario {index + 1}</p>
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={() => onRemoveForm(index)}
+                disabled={forms.length === 1}
+              >
+                Eliminar
+              </Button>
             </div>
-            <Input
-              label="Fecha de solicitud"
-              type="date"
-              error={errors.fechaSolicitud?.message}
-              {...register('fechaSolicitud')}
-            />
-            <Input
-              label="Fecha de entrega"
-              type="date"
-              error={errors.fechaEntrega?.message}
-              {...register('fechaEntrega')}
-            />
-            <Input
-              label="Solicitante"
-              placeholder="Nombre del solicitante"
-              error={errors.solicitante?.message}
-              {...register('solicitante')}
-            />
-            <Select
-              label="Estado"
-              placeholder="Selecciona…"
-              options={estadoOptions}
-              error={errors.estado?.message}
-              {...register('estado')}
-            />
-            <div className="sm:col-span-2 lg:col-span-3">
-              <Textarea
-                label="Observaciones"
-                placeholder="Opcional — notas, riesgos, dependencias…"
-                error={errors.observaciones?.message}
-                {...register('observaciones')}
-              />
-            </div>
-          </FormFieldGrid>
-        </FormSection>
+            <FormSection>
+              <FormFieldGrid>
+                <div className="sm:col-span-2 lg:col-span-3">
+                  <Input
+                    label="Nombre del proyecto"
+                    placeholder="Ej. Portal de servicios estudiantiles"
+                    error={formErrors[index]?.nombreProyecto}
+                    value={form.nombreProyecto}
+                    onChange={(event) => onChange(index, 'nombreProyecto', event.target.value)}
+                  />
+                </div>
+                <Input
+                  label="Fecha de solicitud"
+                  type="date"
+                  error={formErrors[index]?.fechaSolicitud}
+                  value={form.fechaSolicitud}
+                  onChange={(event) => onChange(index, 'fechaSolicitud', event.target.value)}
+                />
+                <Input
+                  label="Fecha de entrega"
+                  type="date"
+                  error={formErrors[index]?.fechaEntrega}
+                  value={form.fechaEntrega}
+                  onChange={(event) => onChange(index, 'fechaEntrega', event.target.value)}
+                />
+                <Input
+                  label="Solicitante"
+                  placeholder="Nombre del solicitante"
+                  error={formErrors[index]?.solicitante}
+                  value={form.solicitante}
+                  onChange={(event) => onChange(index, 'solicitante', event.target.value)}
+                />
+                <Select
+                  label="Estado"
+                  placeholder="Selecciona…"
+                  options={estadoOptions}
+                  error={formErrors[index]?.estado}
+                  value={form.estado}
+                  onChange={(event) => onChange(index, 'estado', event.target.value)}
+                />
+                <div className="sm:col-span-2 lg:col-span-3">
+                  <Textarea
+                    label="Observaciones"
+                    placeholder="Opcional — notas, riesgos, dependencias…"
+                    error={formErrors[index]?.observaciones}
+                    value={form.observaciones}
+                    onChange={(event) => onChange(index, 'observaciones', event.target.value)}
+                  />
+                </div>
+              </FormFieldGrid>
+            </FormSection>
+          </div>
+        ))}
 
         <FormActionBar>
-          <Button type="submit" isLoading={isSubmitting}>
-            Enviar
+          <Button type="button" variant="secondary" onClick={onAddForm}>
+            + Agregar formulario
+          </Button>
+          <Button type="submit" isLoading={submitting}>
+            {forms.length > 1 ? `Enviar ${forms.length} formularios` : 'Enviar'}
           </Button>
         </FormActionBar>
       </form>
 
-      <div className="space-y-3">
-        <h3 className="text-base font-semibold text-foreground">Registros</h3>
-        {listLoading ? (
-          <p className="text-sm text-muted">Cargando…</p>
-        ) : listError ? (
-          <p className="text-sm text-danger">{listError}</p>
-        ) : rows.length === 0 ? (
-          <p className="text-sm text-muted">No hay registros aún.</p>
-        ) : (
-          <div className="overflow-x-auto rounded-xl border border-border/80">
-            <table className="w-full min-w-[640px] text-left text-sm">
-              <thead className="border-b border-border/80 bg-surface-elevated/80 text-xs uppercase text-muted">
-                <tr>
-                  <th className="px-3 py-2 font-medium">Proyecto</th>
-                  <th className="px-3 py-2 font-medium">Solicitud</th>
-                  <th className="px-3 py-2 font-medium">Entrega</th>
-                  <th className="px-3 py-2 font-medium">Solicitante</th>
-                  <th className="px-3 py-2 font-medium">Estado</th>
-                  <th className="px-3 py-2 font-medium">Observaciones</th>
-                </tr>
-              </thead>
-              <tbody>
-                {rows.map((r) => (
-                  <tr key={r.id ?? `${r.nombreProyecto}-${r.fechaSolicitud}`} className="border-b border-border/60 last:border-0">
-                    <td className="px-3 py-2 text-foreground">{r.nombreProyecto ?? '—'}</td>
-                    <td className="px-3 py-2 text-muted">{r.fechaSolicitud ?? '—'}</td>
-                    <td className="px-3 py-2 text-muted">{r.fechaEntrega ?? '—'}</td>
-                    <td className="px-3 py-2 text-muted">{r.solicitante ?? '—'}</td>
-                    <td className="px-3 py-2 text-muted">{r.estado ?? '—'}</td>
-                    <td className="max-w-[200px] truncate px-3 py-2 text-muted" title={r.observaciones ?? ''}>
-                      {r.observaciones ?? '—'}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
     </div>
   );
 }

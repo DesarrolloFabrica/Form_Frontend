@@ -40,6 +40,8 @@ export interface FabricaPayload {
 
 export interface FabricaRecord extends FabricaPayload {
   id?: number;
+  createdByUserId?: number | null;
+  createdByEmail?: string | null;
 }
 
 export interface DesarrolloPayload {
@@ -53,6 +55,8 @@ export interface DesarrolloPayload {
 
 export interface DesarrolloRecord extends DesarrolloPayload {
   id?: number;
+  createdByUserId?: number | null;
+  createdByEmail?: string | null;
 }
 
 export interface LicenciasPayload {
@@ -68,6 +72,8 @@ export interface LicenciasPayload {
 
 export interface LicenciasRecord extends LicenciasPayload {
   id?: number;
+  createdByUserId?: number | null;
+  createdByEmail?: string | null;
 }
 
 export interface LogRecord {
