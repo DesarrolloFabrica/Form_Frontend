@@ -1,4 +1,4 @@
-import { createFabrica, listFabrica } from '@/api/fabrica';
+import { createFabrica, exportFabricaPdf, listFabrica } from '@/api/fabrica';
 import type { FabricaPayload, FabricaRecord } from '@/api/types';
 import { FormActionBar, FormFieldGrid, FormSection, FormSectionTitle } from '@/components/FormLayout';
 import { Button, Input, type SelectOption, Select, Textarea } from '@/components/UiPrimitives';
@@ -106,6 +106,7 @@ export function InventoryFabrica() {
   const [rows, setRows] = useState<FabricaRecord[]>([]);
   const [listLoading, setListLoading] = useState(true);
   const [listError, setListError] = useState<string | null>(null);
+  const [isExportingPdf, setIsExportingPdf] = useState(false);
 
   const loadList = useCallback(async () => {
     setListError(null);
@@ -168,6 +169,18 @@ export function InventoryFabrica() {
       /* interceptor */
     }
   });
+
+  const onExportPdf = async () => {
+    setIsExportingPdf(true);
+    try {
+      await exportFabricaPdf();
+      toast.success('PDF exportado correctamente.');
+    } catch {
+      toast.error('No se pudo exportar el PDF.');
+    } finally {
+      setIsExportingPdf(false);
+    }
+  };
 
   return (
     <div className="space-y-10">
@@ -302,6 +315,9 @@ export function InventoryFabrica() {
         </FormSection>
 
         <FormActionBar>
+          <Button type="button" variant="secondary" onClick={() => void onExportPdf()} isLoading={isExportingPdf}>
+            Exportar PDF
+          </Button>
           <Button type="submit" isLoading={isSubmitting}>
             Enviar
           </Button>
