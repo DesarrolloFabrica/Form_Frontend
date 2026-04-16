@@ -1,10 +1,5 @@
-<<<<<<< HEAD
-import { createFabrica, exportFabricaPdf, listFabrica } from '@/api/fabrica';
-import type { FabricaPayload, FabricaRecord } from '@/api/types';
-=======
-import { createFabrica, createFabricaBulk } from '@/api/fabrica';
+import { createFabrica, createFabricaBulk, exportFabricaPdf } from '@/api/fabrica';
 import type { FabricaPayload } from '@/api/types';
->>>>>>> 5248fc2eb879fe63f72054929293d51ef0e25558
 import { FormActionBar, FormFieldGrid, FormSection, FormSectionTitle } from '@/components/FormLayout';
 import { Button, Input, type SelectOption, Select, Textarea } from '@/components/UiPrimitives';
 import { useState, type FormEvent } from 'react';
@@ -110,16 +105,10 @@ const emptyFabricaForm: FabricaFormInput = {
 };
 
 export function InventoryFabrica() {
-<<<<<<< HEAD
-  const [rows, setRows] = useState<FabricaRecord[]>([]);
-  const [listLoading, setListLoading] = useState(true);
-  const [listError, setListError] = useState<string | null>(null);
-  const [isExportingPdf, setIsExportingPdf] = useState(false);
-=======
   const [forms, setForms] = useState<FabricaFormInput[]>([{ ...emptyFabricaForm }]);
   const [formErrors, setFormErrors] = useState<FabricaFormErrors[]>([{}]);
   const [submitting, setSubmitting] = useState(false);
->>>>>>> 5248fc2eb879fe63f72054929293d51ef0e25558
+  const [isExportingPdf, setIsExportingPdf] = useState(false);
 
   function onAddForm() {
     setForms((prev) => [...prev, { ...emptyFabricaForm }]);
@@ -403,19 +392,14 @@ export function InventoryFabrica() {
         ))}
 
         <FormActionBar>
-<<<<<<< HEAD
           <Button type="button" variant="secondary" onClick={() => void onExportPdf()} isLoading={isExportingPdf}>
             Exportar PDF
           </Button>
-          <Button type="submit" isLoading={isSubmitting}>
-            Enviar
-=======
           <Button type="button" variant="secondary" onClick={onAddForm}>
             + Agregar formulario
           </Button>
           <Button type="submit" isLoading={submitting}>
             {forms.length > 1 ? `Enviar ${forms.length} formularios` : 'Enviar'}
->>>>>>> 5248fc2eb879fe63f72054929293d51ef0e25558
           </Button>
         </FormActionBar>
       </form>
